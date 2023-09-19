@@ -1,11 +1,16 @@
-[tasks.compile]
+[tasks.build]
 command = "cargo"
-args = ["run", "target/source/main.c", "target/source/main.s"]
+args = ["build"]
 
-[tasks.assemble]
-command = "gcc"
-args = ["-o", "target/source/main", "target/source/main.s"]
+[tasks.test]
+command = "./test.sh"
+
+[tasks.testx]
+command = "bash"
+args = ["-x", "test.sh"]
 
 [tasks.run]
-command = "./target/source/main"
-dependencies = ["compile", "assemble"]
+dependencies = ["build", "test"]
+
+[tasks.runx]
+dependencies = ["build", "testx"]
