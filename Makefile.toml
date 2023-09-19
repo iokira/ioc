@@ -1,0 +1,11 @@
+[tasks.compile]
+command = "cargo"
+args = ["run", "target/source/main.c", "target/source/main.s"]
+
+[tasks.assemble]
+command = "gcc"
+args = ["-o", "target/source/main", "target/source/main.s"]
+
+[tasks.run]
+command = "./target/source/main"
+dependencies = ["compile", "assemble"]
