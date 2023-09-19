@@ -10,12 +10,12 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     let input = Input::new(&args).unwrap_or_else(|err| {
-        println!("Problem parsing arguments: {}", err);
+        eprintln!("Problem parsing arguments: {}", err);
         process::exit(1);
     });
 
     if let Err(e) = run(input) {
-        println!("Application error: {}", e);
+        eprintln!("Application error: {}", e);
 
         process::exit(1);
     }
@@ -58,8 +58,8 @@ impl Input {
         let outputfilename = args[2].clone();
 
         Ok(Input {
-            inputfilename: inputfilename,
-            outputfilename: outputfilename,
+            inputfilename,
+            outputfilename,
         })
     }
 }
