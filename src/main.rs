@@ -28,16 +28,11 @@ fn run(input: Input) -> Result<(), Box<dyn Error>> {
     let mut contents = String::new();
     inputfile.read_to_string(&mut contents)?;
 
-    write!(
-        outputfile,
-        ".intel_syntax noprefix\n\
-.globl main\n\
-main:\n\
-    mov rax, {}\n\
-    ret\n\
-        ",
-        contents
-    )?;
+    writeln!(outputfile, ".intel_syntax noprefix")?;
+    writeln!(outputfile, ".globl main")?;
+    writeln!(outputfile, "main:")?;
+    writeln!(outputfile, "\tmov rax, {}", contents)?;
+    writeln!(outputfile, "\tret")?;
     outputfile.flush()?;
 
     Ok(())
