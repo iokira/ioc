@@ -32,12 +32,21 @@ pub fn run(input: Input) -> Result<(), Box<dyn Error>> {
     let mut contents = String::new();
     input_file.read_to_string(&mut contents)?;
 
-    writeln!(output_file, ".intel_syntax noprefix")?;
-    writeln!(output_file, ".globl main")?;
-    writeln!(output_file, "main:")?;
-    writeln!(output_file, "\tmov rax, {}", contents)?;
-    writeln!(output_file, "\tret")?;
+    let assembly = construct_assembly(&contents);
+
+    write!(output_file, "{}", assembly)?;
     output_file.flush()?;
 
     Ok(())
+}
+
+fn construct_assembly(contents: &str) -> String {
+    let mut assembly = String::new();
+    assembly.push_str(".intel_syntax noprefix\n");
+    assembly.push_str(".globl main\n");
+    assembly.push_str("main:\n");
+    assembly.push_str("\tmov rax, ");
+    assembly.push_str(contents);
+    assembly.push_str("\tret\n");
+    assembly
 }
