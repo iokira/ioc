@@ -63,6 +63,7 @@ enum Operator {
 enum Token {
     Operator(Operator),
     Operand(f64),
+    EOF,
 }
 
 #[derive(Debug, PartialEq)]
@@ -70,74 +71,68 @@ enum ErrorToken {
     InvaildChar(char),
 }
 
-fn tokenize(expr: &str) -> Result<Vec<Token>, ErrorToken> {
-    expr.chars()
-        .filter(|c| !c.is_whitespace())
-        .map(|c| match c {
-            '+' => Ok(Token::Operator(Operator::Add)),
-            '-' => Ok(Token::Operator(Operator::Sub)),
-            '*' => Ok(Token::Operator(Operator::Mul)),
-            '/' => Ok(Token::Operator(Operator::Div)),
-            n => {
-                if let Ok(num) = n.to_string().parse::<f64>() {
-                    Ok(Token::Operand(num))
-                } else {
-                    Err(ErrorToken::InvaildChar(n))
-                }
-            }
-        })
-        .into_iter()
-        .collect()
+struct Lexer {
+    input: Vec<char>,
+    position: usize,
+    length: usize,
 }
 
-#[cfg(test)]
-mod test {
-    use super::*;
+impl Lexer {
+    fn new(input: &str) -> Lexer {
+        Lexer {
+            input: input.chars().collect(),
+            position: 0,
+            length: input.len(),
+        }
+    }
 
-    #[test]
-    fn tokenize_test() {
-        assert_eq!(tokenize("1"), Ok(vec![Token::Operand(1.0)]));
-        assert_eq!(tokenize("2"), Ok(vec![Token::Operand(2.0)]));
-        assert_eq!(tokenize("3"), Ok(vec![Token::Operand(3.0)]));
-        assert_eq!(tokenize("4"), Ok(vec![Token::Operand(4.0)]));
-        assert_eq!(tokenize("5"), Ok(vec![Token::Operand(5.0)]));
-        assert_eq!(tokenize("6"), Ok(vec![Token::Operand(6.0)]));
-        assert_eq!(tokenize("7"), Ok(vec![Token::Operand(7.0)]));
-        assert_eq!(tokenize("8"), Ok(vec![Token::Operand(8.0)]));
-        assert_eq!(tokenize("9"), Ok(vec![Token::Operand(9.0)]));
-        assert_eq!(tokenize("0"), Ok(vec![Token::Operand(0.0)]));
+    fn next_token(&mut self) -> Result<Token, ErrorToken> {
+        while self.current_char().is_whitespace() {
+            self.next_char();
+        }
 
-        assert_eq!(tokenize("+"), Ok(vec![Token::Operator(Operator::Add)]));
-        assert_eq!(tokenize("-"), Ok(vec![Token::Operator(Operator::Sub)]));
-        assert_eq!(tokenize("*"), Ok(vec![Token::Operator(Operator::Mul)]));
-        assert_eq!(tokenize("/"), Ok(vec![Token::Operator(Operator::Div)]));
+        let curr = self.current_char();
+        let token = if Self::is_number(curr) {
+            let mut number = vec![*curr];
+            while Self::is_number(self.peek_char()) {
+                self.next_char();
+                number.push(*self.current_char());
+            }
+            let s: String = number.iter().collect();
+            Ok(Token::Operand(s.parse::<f64>().unwrap()))
+        } else {
+            match curr {
+                &'+' => Ok(Token::Operator(Operator::Add)),
+                &'-' => Ok(Token::Operator(Operator::Sub)),
+                &'*' => Ok(Token::Operator(Operator::Mul)),
+                &'/' => Ok(Token::Operator(Operator::Div)),
+                &'\0' => Ok(Token::EOF),
+                _ => Err(ErrorToken::InvaildChar(*curr)),
+            }
+        };
+        self.next_char();
+        return token;
+    }
 
-        assert_eq!(tokenize("a"), Err(ErrorToken::InvaildChar('a')));
+    fn next_char(&mut self) {
+        self.position += 1;
+    }
 
-        assert_eq!(tokenize(" "), Ok(vec![]));
-        assert_eq!(tokenize(" 1"), Ok(vec![Token::Operand(1.0)]));
-        assert_eq!(tokenize("1 "), Ok(vec![Token::Operand(1.0)]));
-        assert_eq!(
-            tokenize("1 1"),
-            Ok(vec![Token::Operand(1.0), Token::Operand(1.0)])
-        );
+    fn current_char(&mut self) -> &char {
+        match self.input.get(self.position) {
+            Some(c) => c,
+            None => &'\0',
+        }
+    }
 
-        assert_eq!(
-            tokenize("123 + 4 * 2 - 20 / 2"),
-            Ok(vec![
-                Token::Operand(1.0),
-                Token::Operand(2.0),
-                Token::Operand(3.0),
-                Token::Operator(Operator::Add),
-                Token::Operand(4.0),
-                Token::Operator(Operator::Mul),
-                Token::Operand(2.0),
-                Token::Operator(Operator::Sub),
-                Token::Operand(2.0),
-                Token::Operand(0.0),
-                Token::Operator(Operator::Div),
-                Token::Operand(2.0)
-            ])
-        )
+    fn peek_char(&mut self) -> &char {
+        match self.input.get(self.position + 1) {
+            Some(c) => c,
+            None => &'\0',
+        }
+    }
+
+    fn is_number(c: &char) -> bool {
+        c.is_ascii_digit() || c == &'.'
     }
 }
