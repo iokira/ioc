@@ -7,6 +7,9 @@ use std::{
     io::{Read, Write},
 };
 
+use lexer::lexer::Lexer;
+use token::token::*;
+
 pub struct Input {
     input_file_name: String,
     output_file_name: String,
@@ -45,11 +48,33 @@ pub fn run(input: Input) -> Result<(), Box<dyn Error>> {
 
 fn construct_assembly(contents: &str) -> String {
     let mut assembly = String::new();
+    let mut lexer = Lexer::new(contents);
     assembly.push_str(".intel_syntax noprefix\n");
     assembly.push_str(".globl main\n");
     assembly.push_str("main:\n");
-    assembly.push_str("\tmov rax, ");
-    assembly.push_str(contents);
+    loop {
+        match lexer.next_token() {
+            Ok(Token::Operand(n)) => {
+                let str = format!("\tmov rax, {}\n", n);
+                assembly.push_str(&str);
+            }
+            Ok(Token::Operator(o)) => match lexer.next_token() {
+                Ok(Token::Operand(n)) => match o {
+                    Operator::Add => {
+                        let str = format!("\tadd rax, {}\n", n);
+                        assembly.push_str(&str);
+                    }
+                    Operator::Sub => {
+                        let str = format!("\tsub rax, {}\n", n);
+                        assembly.push_str(&str);
+                    }
+                    _ => panic!("unimplemented"),
+                },
+                _ => panic!("syntax error"),
+            },
+            _ => break,
+        }
+    }
     assembly.push_str("\tret\n");
     assembly
 }
