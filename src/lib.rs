@@ -1,13 +1,14 @@
 pub mod lexer;
+pub mod myerror;
 pub mod token;
 
 use std::{
-    error::Error,
     fs::File,
     io::{Read, Write},
 };
 
 use lexer::lexer::Lexer;
+use myerror::myerror::*;
 use token::token::*;
 
 pub struct Input {
@@ -31,22 +32,61 @@ impl Input {
     }
 }
 
-pub fn run(input: Input) -> Result<(), Box<dyn Error>> {
-    let mut input_file = File::open(input.input_file_name)?;
-    let mut output_file = File::create(input.output_file_name)?;
+pub fn run(input: Input) -> Result<(), MyError> {
+    let mut input_file = match File::open(input.input_file_name) {
+        Ok(it) => it,
+        Err(err) => {
+            return Err(MyError {
+                message: err.to_string(),
+            })
+        }
+    };
+    let mut output_file = match File::create(input.output_file_name) {
+        Ok(it) => it,
+        Err(err) => {
+            return Err(MyError {
+                message: err.to_string(),
+            })
+        }
+    };
 
     let mut contents = String::new();
-    input_file.read_to_string(&mut contents)?;
+    match input_file.read_to_string(&mut contents) {
+        Ok(it) => it,
+        Err(err) => {
+            return Err(MyError {
+                message: err.to_string(),
+            })
+        }
+    };
 
-    let assembly = construct_assembly(&contents);
-
-    write!(output_file, "{}", assembly)?;
-    output_file.flush()?;
+    match construct_assembly(&contents) {
+        Ok(a) => {
+            let assembly = a;
+            match write!(output_file, "{}", assembly) {
+                Ok(it) => it,
+                Err(err) => {
+                    return Err(MyError {
+                        message: err.to_string(),
+                    })
+                }
+            };
+            match output_file.flush() {
+                Ok(it) => it,
+                Err(err) => {
+                    return Err(MyError {
+                        message: err.to_string(),
+                    })
+                }
+            };
+        }
+        Err(e) => return Err(e),
+    }
 
     Ok(())
 }
 
-fn construct_assembly(contents: &str) -> String {
+fn construct_assembly(contents: &str) -> Result<String, MyError> {
     let mut assembly = String::new();
     let mut lexer = Lexer::new(contents);
     assembly.push_str(".intel_syntax noprefix\n");
@@ -68,13 +108,26 @@ fn construct_assembly(contents: &str) -> String {
                         let str = format!("\tsub rax, {}\n", n);
                         assembly.push_str(&str);
                     }
-                    _ => panic!("unimplemented"),
+                    _ => {
+                        return Err(MyError {
+                            message: "unimplemented".to_string(),
+                        })
+                    }
                 },
-                _ => panic!("syntax error"),
+                _ => {
+                    return Err(MyError {
+                        message: "syntax error".to_string(),
+                    })
+                }
             },
-            _ => break,
+            Ok(Token::EOF) => break,
+            _ => {
+                return Err(MyError {
+                    message: "syntax error".to_string(),
+                })
+            }
         }
     }
     assembly.push_str("\tret\n");
-    assembly
+    Ok(assembly)
 }
