@@ -1,10 +1,14 @@
 pub mod tree {
     #[derive(Debug, PartialEq)]
     pub enum NodeKind {
-        ADD,
-        SUB,
-        MUL,
-        DIV,
+        Equality,
+        Nonequality,
+        Less,
+        LessOrEqual,
+        Add,
+        Sub,
+        Mul,
+        Div,
     }
 
     #[derive(Debug, PartialEq)]

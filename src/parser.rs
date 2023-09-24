@@ -4,13 +4,53 @@ pub mod parser {
     use crate::tree::tree::*;
 
     pub fn expr(lexer: &mut Lexer) -> Tree {
+        equality(lexer)
+    }
+
+    fn equality(lexer: &mut Lexer) -> Tree {
+        let mut tree = relational(lexer);
+        while lexer.expect(OperatorKind::Equality) || lexer.expect(OperatorKind::Nonequality) {
+            if let Ok(_) = lexer.consume(OperatorKind::Equality) {
+                tree = Tree::new_tree(NodeKind::Equality, tree, relational(lexer));
+            }
+            if let Ok(_) = lexer.consume(OperatorKind::Nonequality) {
+                tree = Tree::new_tree(NodeKind::Nonequality, tree, relational(lexer));
+            }
+        }
+        tree
+    }
+
+    fn relational(lexer: &mut Lexer) -> Tree {
+        let mut tree = add(lexer);
+        while lexer.expect(OperatorKind::Less)
+            || lexer.expect(OperatorKind::LessOrEqual)
+            || lexer.expect(OperatorKind::Greater)
+            || lexer.expect(OperatorKind::GreaterOrEqual)
+        {
+            if let Ok(_) = lexer.consume(OperatorKind::Less) {
+                tree = Tree::new_tree(NodeKind::Less, tree, add(lexer));
+            }
+            if let Ok(_) = lexer.consume(OperatorKind::LessOrEqual) {
+                tree = Tree::new_tree(NodeKind::LessOrEqual, tree, add(lexer));
+            }
+            if let Ok(_) = lexer.consume(OperatorKind::Greater) {
+                tree = Tree::new_tree(NodeKind::Less, add(lexer), tree);
+            }
+            if let Ok(_) = lexer.consume(OperatorKind::GreaterOrEqual) {
+                tree = Tree::new_tree(NodeKind::LessOrEqual, add(lexer), tree);
+            }
+        }
+        tree
+    }
+
+    fn add(lexer: &mut Lexer) -> Tree {
         let mut tree = mul(lexer);
         while lexer.expect(OperatorKind::Add) || lexer.expect(OperatorKind::Sub) {
             if let Ok(_) = lexer.consume(OperatorKind::Add) {
-                tree = Tree::new_tree(NodeKind::ADD, tree, mul(lexer));
+                tree = Tree::new_tree(NodeKind::Add, tree, mul(lexer));
             }
             if let Ok(_) = lexer.consume(OperatorKind::Sub) {
-                tree = Tree::new_tree(NodeKind::SUB, tree, mul(lexer));
+                tree = Tree::new_tree(NodeKind::Sub, tree, mul(lexer));
             }
         }
         tree
@@ -20,10 +60,10 @@ pub mod parser {
         let mut tree = unary(lexer);
         while lexer.expect(OperatorKind::Mul) || lexer.expect(OperatorKind::Div) {
             if let Ok(_) = lexer.consume(OperatorKind::Mul) {
-                tree = Tree::new_tree(NodeKind::MUL, tree, unary(lexer));
+                tree = Tree::new_tree(NodeKind::Mul, tree, unary(lexer));
             }
             if let Ok(_) = lexer.consume(OperatorKind::Div) {
-                tree = Tree::new_tree(NodeKind::DIV, tree, unary(lexer));
+                tree = Tree::new_tree(NodeKind::Div, tree, unary(lexer));
             }
         }
         tree
@@ -34,7 +74,7 @@ pub mod parser {
             return primary(lexer);
         }
         if let Ok(_) = lexer.consume(OperatorKind::Sub) {
-            return Tree::new_tree(NodeKind::SUB, Tree::Leaf(0.0), primary(lexer));
+            return Tree::new_tree(NodeKind::Sub, Tree::Leaf(0.0), primary(lexer));
         }
         primary(lexer)
     }
@@ -64,7 +104,7 @@ mod test {
         assert_eq!(
             expr(lexer1),
             Tree::Node(
-                NodeKind::ADD,
+                NodeKind::Add,
                 Box::new(Tree::Leaf(1.0)),
                 Box::new(Tree::Leaf(1.0))
             )
@@ -74,10 +114,10 @@ mod test {
         assert_eq!(
             expr(lexer2),
             Tree::Node(
-                NodeKind::ADD,
+                NodeKind::Add,
                 Box::new(Tree::Leaf(1.0)),
                 Box::new(Tree::Node(
-                    NodeKind::MUL,
+                    NodeKind::Mul,
                     Box::new(Tree::Leaf(1.0)),
                     Box::new(Tree::Leaf(2.0))
                 ))
@@ -88,20 +128,20 @@ mod test {
         assert_eq!(
             expr(lexer3),
             Tree::Node(
-                NodeKind::SUB,
+                NodeKind::Sub,
                 Box::new(Tree::Node(
-                    NodeKind::MUL,
+                    NodeKind::Mul,
                     Box::new(Tree::Leaf(3.0)),
                     Box::new(Tree::Node(
-                        NodeKind::ADD,
+                        NodeKind::Add,
                         Box::new(Tree::Leaf(2.0)),
                         Box::new(Tree::Leaf(3.0))
                     ))
                 )),
                 Box::new(Tree::Node(
-                    NodeKind::ADD,
+                    NodeKind::Add,
                     Box::new(Tree::Node(
-                        NodeKind::DIV,
+                        NodeKind::Div,
                         Box::new(Tree::Leaf(6.0)),
                         Box::new(Tree::Leaf(2.0))
                     )),
@@ -114,12 +154,30 @@ mod test {
         assert_eq!(
             expr(lexer4),
             Tree::Node(
-                NodeKind::ADD,
+                NodeKind::Add,
                 Box::new(Tree::Leaf(5.0)),
                 Box::new(Tree::Node(
-                    NodeKind::MUL,
+                    NodeKind::Mul,
                     Box::new(Tree::Leaf(6.0)),
                     Box::new(Tree::Leaf(7.0))
+                ))
+            )
+        );
+
+        let lexer5 = &mut Lexer::new("2 * 3 == 3 + 1");
+        assert_eq!(
+            expr(lexer5),
+            Tree::Node(
+                NodeKind::Equality,
+                Box::new(Tree::Node(
+                    NodeKind::Mul,
+                    Box::new(Tree::Leaf(2.0)),
+                    Box::new(Tree::Leaf(3.0)),
+                )),
+                Box::new(Tree::Node(
+                    NodeKind::Add,
+                    Box::new(Tree::Leaf(3.0)),
+                    Box::new(Tree::Leaf(1.0)),
                 ))
             )
         );
