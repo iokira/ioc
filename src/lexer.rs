@@ -34,12 +34,39 @@ pub mod lexer {
                     &'-' => Ok(Token::Operator(Operator::Sub)),
                     &'*' => Ok(Token::Operator(Operator::Mul)),
                     &'/' => Ok(Token::Operator(Operator::Div)),
+                    &'(' => Ok(Token::Operator(Operator::LParen)),
+                    &')' => Ok(Token::Operator(Operator::RParen)),
                     &'\0' => Ok(Token::EOF),
                     _ => Err(ErrorToken::InvaildChar(*curr)),
                 }
             };
             self.next_char();
             return token;
+        }
+
+        pub fn consume(&mut self, op: Operator) -> Result<Token, ErrorToken> {
+            while self.current_char().is_whitespace() {
+                self.next_char();
+            }
+            let curr = self.current_char();
+            let op_chars: Vec<char> = format!("{}", op).chars().collect();
+            let op_char = op_chars[0];
+            if curr == &op_char {
+                self.next_char();
+                Ok(Token::Operator(op))
+            } else {
+                Err(ErrorToken::InvaildChar(*curr))
+            }
+        }
+
+        pub fn expect(&mut self, op: Operator) -> bool {
+            while self.current_char().is_whitespace() {
+                self.next_char();
+            }
+            let curr = self.current_char();
+            let op_chars: Vec<char> = format!("{}", op).chars().collect();
+            let op_char = op_chars[0];
+            curr == &op_char
         }
 
         fn next_char(&mut self) {
