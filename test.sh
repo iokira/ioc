@@ -10,7 +10,6 @@ assert() {
     input="$2"
 
     echo $input > $MAINC
-    cat $MAINC
     $IOC $MAINC $MAINS
     gcc $MAINS -o $MAIN
     $MAIN
