@@ -99,5 +99,19 @@ mod test {
                 ))
             )
         );
+
+        let lexer4 = &mut Lexer::new("5 + 6 * 7");
+        assert_eq!(
+            expr(lexer4),
+            Tree::Node(
+                NodeKind::ADD,
+                Box::new(Tree::Leaf(5.0)),
+                Box::new(Tree::Node(
+                    NodeKind::MUL,
+                    Box::new(Tree::Leaf(6.0)),
+                    Box::new(Tree::Leaf(7.0))
+                ))
+            )
+        );
     }
 }

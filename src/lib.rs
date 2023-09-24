@@ -11,7 +11,8 @@ use std::{
 
 use lexer::lexer::Lexer;
 use myerror::myerror::*;
-use token::token::*;
+use parser::parser::*;
+use tree::tree::*;
 
 pub struct Input {
     input_file_name: String,
@@ -95,49 +96,40 @@ pub fn run(input: Input) -> Result<(), MyError> {
 
 fn construct_assembly(contents: &str) -> Result<String, MyError> {
     let mut assembly = String::new();
-    let mut lexer = Lexer::new(contents);
+    let lexer = &mut Lexer::new(contents);
+    let tree: Tree = expr(lexer);
+
     assembly.push_str(".intel_syntax noprefix\n");
     assembly.push_str(".globl main\n");
     assembly.push_str("main:\n");
-    loop {
-        match lexer.next_token() {
-            Ok(Token::Operand(n)) => {
-                let str = format!("\tmov rax, {}\n", n);
-                assembly.push_str(&str);
-            }
-            Ok(Token::Operator(o)) => match lexer.next_token() {
-                Ok(Token::Operand(n)) => match o {
-                    Operator::Add => {
-                        let str = format!("\tadd rax, {}\n", n);
-                        assembly.push_str(&str);
-                    }
-                    Operator::Sub => {
-                        let str = format!("\tsub rax, {}\n", n);
-                        assembly.push_str(&str);
-                    }
-                    _ => {
-                        return Err(MyError {
-                            message: "unimplemented".to_string(),
-                            position: lexer.get_positoin(),
-                        })
-                    }
-                },
-                _ => {
-                    return Err(MyError {
-                        message: "syntax error".to_string(),
-                        position: lexer.get_positoin(),
-                    })
-                }
-            },
-            Ok(Token::EOF) => break,
-            _ => {
-                return Err(MyError {
-                    message: "syntax error".to_string(),
-                    position: lexer.get_positoin(),
-                })
-            }
-        }
-    }
+
+    generate_assembly(&mut assembly, tree);
+
+    assembly.push_str("\tpop rax\n");
     assembly.push_str("\tret\n");
     Ok(assembly)
+}
+
+fn generate_assembly(assembly: &mut String, tree: Tree) {
+    if let Tree::Leaf(n) = tree {
+        let str = format!("\tpush {}\n", n);
+        assembly.push_str(&str);
+        return;
+    }
+
+    if let Tree::Node(kind, lhs, rhs) = tree {
+        generate_assembly(assembly, *lhs);
+        generate_assembly(assembly, *rhs);
+
+        assembly.push_str("\tpop rdi\n");
+        assembly.push_str("\tpop rax\n");
+
+        match kind {
+            NodeKind::ADD => assembly.push_str("\tadd rax, rdi\n"),
+            NodeKind::SUB => assembly.push_str("\tsub rax, rdi\n"),
+            NodeKind::MUL => assembly.push_str("\timul rax, rdi\n"),
+            NodeKind::DIV => assembly.push_str("\tcqo\n\tidiv rdi\n"),
+        }
+        assembly.push_str("\tpush rax\n");
+    }
 }
