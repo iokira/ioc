@@ -5,11 +5,11 @@ pub mod parser {
 
     pub fn expr(lexer: &mut Lexer) -> Tree {
         let mut tree = mul(lexer);
-        while lexer.expect(Operator::Add) || lexer.expect(Operator::Sub) {
-            if let Ok(_) = lexer.consume(Operator::Add) {
+        while lexer.expect(OperatorKind::Add) || lexer.expect(OperatorKind::Sub) {
+            if let Ok(_) = lexer.consume(OperatorKind::Add) {
                 tree = Tree::new_tree(NodeKind::ADD, tree, mul(lexer));
             }
-            if let Ok(_) = lexer.consume(Operator::Sub) {
+            if let Ok(_) = lexer.consume(OperatorKind::Sub) {
                 tree = Tree::new_tree(NodeKind::SUB, tree, mul(lexer));
             }
         }
@@ -18,11 +18,11 @@ pub mod parser {
 
     fn mul(lexer: &mut Lexer) -> Tree {
         let mut tree = unary(lexer);
-        while lexer.expect(Operator::Mul) || lexer.expect(Operator::Div) {
-            if let Ok(_) = lexer.consume(Operator::Mul) {
+        while lexer.expect(OperatorKind::Mul) || lexer.expect(OperatorKind::Div) {
+            if let Ok(_) = lexer.consume(OperatorKind::Mul) {
                 tree = Tree::new_tree(NodeKind::MUL, tree, unary(lexer));
             }
-            if let Ok(_) = lexer.consume(Operator::Div) {
+            if let Ok(_) = lexer.consume(OperatorKind::Div) {
                 tree = Tree::new_tree(NodeKind::DIV, tree, unary(lexer));
             }
         }
@@ -30,10 +30,10 @@ pub mod parser {
     }
 
     fn unary(lexer: &mut Lexer) -> Tree {
-        if let Ok(_) = lexer.consume(Operator::Add) {
+        if let Ok(_) = lexer.consume(OperatorKind::Add) {
             return primary(lexer);
         }
-        if let Ok(_) = lexer.consume(Operator::Sub) {
+        if let Ok(_) = lexer.consume(OperatorKind::Sub) {
             return Tree::new_tree(NodeKind::SUB, Tree::Leaf(0.0), primary(lexer));
         }
         primary(lexer)
@@ -41,9 +41,9 @@ pub mod parser {
 
     fn primary(lexer: &mut Lexer) -> Tree {
         match lexer.next_token() {
-            Ok(Token::Operator(Operator::LParen)) => {
+            Ok(Token::Operator(OperatorKind::LParen)) => {
                 let tree = expr(lexer);
-                match lexer.consume(Operator::RParen) {
+                match lexer.consume(OperatorKind::RParen) {
                     Ok(_) => return tree,
                     _ => panic!("expect ')' but disappear"),
                 }

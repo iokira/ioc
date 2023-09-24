@@ -2,18 +2,8 @@ pub mod token {
     use core::fmt;
 
     #[derive(Debug, PartialEq)]
-    pub enum Operator {
-        Add,
-        Sub,
-        Mul,
-        Div,
-        LParen,
-        RParen,
-    }
-
-    #[derive(Debug, PartialEq)]
     pub enum Token {
-        Operator(Operator),
+        Operator(OperatorKind),
         Operand(f64),
         EOF,
     }
@@ -23,15 +13,37 @@ pub mod token {
         InvaildChar(char),
     }
 
-    impl fmt::Display for Operator {
+    #[derive(Debug, PartialEq)]
+    pub enum OperatorKind {
+        Equality,
+        Nonequality,
+        Less,
+        LessOrEqual,
+        Greater,
+        GreaterOrEqual,
+        Add,
+        Sub,
+        Mul,
+        Div,
+        LParen,
+        RParen,
+    }
+
+    impl fmt::Display for OperatorKind {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             match *self {
-                Operator::Add => write!(f, "+"),
-                Operator::Sub => write!(f, "-"),
-                Operator::Mul => write!(f, "*"),
-                Operator::Div => write!(f, "/"),
-                Operator::LParen => write!(f, "("),
-                Operator::RParen => write!(f, ")"),
+                OperatorKind::Equality => write!(f, "=="),
+                OperatorKind::Nonequality => write!(f, "!="),
+                OperatorKind::Less => write!(f, "<"),
+                OperatorKind::LessOrEqual => write!(f, "<="),
+                OperatorKind::Greater => write!(f, ">"),
+                OperatorKind::GreaterOrEqual => write!(f, ">="),
+                OperatorKind::Add => write!(f, "+"),
+                OperatorKind::Sub => write!(f, "-"),
+                OperatorKind::Mul => write!(f, "*"),
+                OperatorKind::Div => write!(f, "/"),
+                OperatorKind::LParen => write!(f, "("),
+                OperatorKind::RParen => write!(f, ")"),
             }
         }
     }

@@ -16,74 +16,107 @@ pub mod lexer {
 
         pub fn next_token(&mut self) -> Result<Token, ErrorToken> {
             while self.current_char().is_whitespace() {
-                self.next_char();
+                self.proceed_char(1);
             }
 
             let curr = self.current_char();
-            let token = if Self::is_number(curr) {
-                let mut number = vec![*curr];
-                while Self::is_number(self.peek_char()) {
-                    self.next_char();
-                    number.push(*self.current_char());
+            let token = if Self::is_number(&curr) {
+                let mut number = vec![curr];
+                while Self::is_number(&self.peek_char(1)) {
+                    self.proceed_char(1);
+                    number.push(self.current_char());
                 }
                 let s: String = number.iter().collect();
                 Ok(Token::Operand(s.parse::<f64>().unwrap()))
             } else {
                 match curr {
-                    &'+' => Ok(Token::Operator(Operator::Add)),
-                    &'-' => Ok(Token::Operator(Operator::Sub)),
-                    &'*' => Ok(Token::Operator(Operator::Mul)),
-                    &'/' => Ok(Token::Operator(Operator::Div)),
-                    &'(' => Ok(Token::Operator(Operator::LParen)),
-                    &')' => Ok(Token::Operator(Operator::RParen)),
-                    &'\0' => Ok(Token::EOF),
-                    _ => Err(ErrorToken::InvaildChar(*curr)),
+                    '=' if (self.peek_char(1) == '=') => {
+                        self.proceed_char(1);
+                        Ok(Token::Operator(OperatorKind::Equality))
+                    }
+                    '!' if (self.peek_char(1) == '=') => {
+                        self.proceed_char(1);
+                        Ok(Token::Operator(OperatorKind::Nonequality))
+                    }
+                    '<' if (self.peek_char(1) == '=') => {
+                        self.proceed_char(1);
+                        Ok(Token::Operator(OperatorKind::LessOrEqual))
+                    }
+                    '<' => Ok(Token::Operator(OperatorKind::Less)),
+                    '>' if (self.peek_char(1) == '=') => {
+                        self.proceed_char(1);
+                        Ok(Token::Operator(OperatorKind::GreaterOrEqual))
+                    }
+                    '>' => Ok(Token::Operator(OperatorKind::Greater)),
+                    '+' => Ok(Token::Operator(OperatorKind::Add)),
+                    '-' => Ok(Token::Operator(OperatorKind::Sub)),
+                    '*' => Ok(Token::Operator(OperatorKind::Mul)),
+                    '/' => Ok(Token::Operator(OperatorKind::Div)),
+                    '(' => Ok(Token::Operator(OperatorKind::LParen)),
+                    ')' => Ok(Token::Operator(OperatorKind::RParen)),
+                    '\0' => Ok(Token::EOF),
+                    _ => Err(ErrorToken::InvaildChar(curr)),
                 }
             };
-            self.next_char();
+            self.proceed_char(1);
             return token;
         }
 
-        pub fn consume(&mut self, op: Operator) -> Result<Token, ErrorToken> {
+        pub fn consume(&mut self, op: OperatorKind) -> Result<Token, ErrorToken> {
             while self.current_char().is_whitespace() {
-                self.next_char();
+                self.proceed_char(1);
             }
-            let curr = self.current_char();
-            let op_chars: Vec<char> = format!("{}", op).chars().collect();
-            let op_char = op_chars[0];
-            if curr == &op_char {
-                self.next_char();
+
+            let op_chars = format!("{}", op);
+            let op_chars_len = op_chars.len();
+
+            let mut curr = String::new();
+            let c = self.current_char();
+
+            for i in 0..op_chars_len {
+                curr.push_str(&self.peek_char(i).to_string()[..]);
+            }
+
+            if curr == op_chars {
+                self.proceed_char(op_chars_len);
                 Ok(Token::Operator(op))
             } else {
-                Err(ErrorToken::InvaildChar(*curr))
+                Err(ErrorToken::InvaildChar(c))
             }
         }
 
-        pub fn expect(&mut self, op: Operator) -> bool {
+        pub fn expect(&mut self, op: OperatorKind) -> bool {
             while self.current_char().is_whitespace() {
-                self.next_char();
+                self.proceed_char(1);
             }
-            let curr = self.current_char();
-            let op_chars: Vec<char> = format!("{}", op).chars().collect();
-            let op_char = op_chars[0];
-            curr == &op_char
+
+            let op_chars = format!("{}", op);
+            let op_chars_len = op_chars.len();
+
+            let mut curr = String::new();
+
+            for i in 0..op_chars_len {
+                curr.push_str(&self.peek_char(i).to_string()[..]);
+            }
+
+            curr == op_chars
         }
 
-        fn next_char(&mut self) {
-            self.position += 1;
+        fn proceed_char(&mut self, n: usize) {
+            self.position += n;
         }
 
-        fn current_char(&mut self) -> &char {
+        fn current_char(&mut self) -> char {
             match self.input.get(self.position) {
-                Some(c) => c,
-                None => &'\0',
+                Some(c) => c.clone(),
+                None => '\0',
             }
         }
 
-        fn peek_char(&mut self) -> &char {
-            match self.input.get(self.position + 1) {
-                Some(c) => c,
-                None => &'\0',
+        fn peek_char(&mut self, n: usize) -> char {
+            match self.input.get(self.position + n) {
+                Some(c) => c.clone(),
+                None => '\0',
             }
         }
 
@@ -103,19 +136,33 @@ mod test {
 
     #[test]
     fn test_lexer() {
-        let mut lexer = Lexer::new("1 +10 - 2*3 + 6/2a");
+        let mut lexer = Lexer::new("1 +10 - 2*3 + 6/2a == < >= !==");
         assert_eq!(lexer.next_token(), Ok(Token::Operand(1.0)));
-        assert_eq!(lexer.next_token(), Ok(Token::Operator(Operator::Add)));
+        assert_eq!(lexer.next_token(), Ok(Token::Operator(OperatorKind::Add)));
         assert_eq!(lexer.next_token(), Ok(Token::Operand(10.0)));
-        assert_eq!(lexer.next_token(), Ok(Token::Operator(Operator::Sub)));
+        assert_eq!(lexer.next_token(), Ok(Token::Operator(OperatorKind::Sub)));
         assert_eq!(lexer.next_token(), Ok(Token::Operand(2.0)));
-        assert_eq!(lexer.next_token(), Ok(Token::Operator(Operator::Mul)));
+        assert_eq!(lexer.next_token(), Ok(Token::Operator(OperatorKind::Mul)));
         assert_eq!(lexer.next_token(), Ok(Token::Operand(3.0)));
-        assert_eq!(lexer.next_token(), Ok(Token::Operator(Operator::Add)));
+        assert_eq!(lexer.next_token(), Ok(Token::Operator(OperatorKind::Add)));
         assert_eq!(lexer.next_token(), Ok(Token::Operand(6.0)));
-        assert_eq!(lexer.next_token(), Ok(Token::Operator(Operator::Div)));
+        assert_eq!(lexer.next_token(), Ok(Token::Operator(OperatorKind::Div)));
         assert_eq!(lexer.next_token(), Ok(Token::Operand(2.0)));
         assert_eq!(lexer.next_token(), Err(ErrorToken::InvaildChar('a')));
+        assert_eq!(
+            lexer.next_token(),
+            Ok(Token::Operator(OperatorKind::Equality))
+        );
+        assert_eq!(lexer.next_token(), Ok(Token::Operator(OperatorKind::Less)));
+        assert_eq!(
+            lexer.next_token(),
+            Ok(Token::Operator(OperatorKind::GreaterOrEqual))
+        );
+        assert_eq!(
+            lexer.next_token(),
+            Ok(Token::Operator(OperatorKind::Nonequality))
+        );
+        assert_eq!(lexer.next_token(), Err(ErrorToken::InvaildChar('=')));
         assert_eq!(lexer.next_token(), Ok(Token::EOF));
     }
 }
