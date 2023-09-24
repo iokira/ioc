@@ -17,16 +17,26 @@ pub mod parser {
     }
 
     fn mul(lexer: &mut Lexer) -> Tree {
-        let mut tree = primary(lexer);
+        let mut tree = unary(lexer);
         while lexer.expect(Operator::Mul) || lexer.expect(Operator::Div) {
             if let Ok(_) = lexer.consume(Operator::Mul) {
-                tree = Tree::new_tree(NodeKind::MUL, tree, primary(lexer));
+                tree = Tree::new_tree(NodeKind::MUL, tree, unary(lexer));
             }
             if let Ok(_) = lexer.consume(Operator::Div) {
-                tree = Tree::new_tree(NodeKind::DIV, tree, primary(lexer));
+                tree = Tree::new_tree(NodeKind::DIV, tree, unary(lexer));
             }
         }
         tree
+    }
+
+    fn unary(lexer: &mut Lexer) -> Tree {
+        if let Ok(_) = lexer.consume(Operator::Add) {
+            return primary(lexer);
+        }
+        if let Ok(_) = lexer.consume(Operator::Sub) {
+            return Tree::new_tree(NodeKind::SUB, Tree::Leaf(0.0), primary(lexer));
+        }
+        primary(lexer)
     }
 
     fn primary(lexer: &mut Lexer) -> Tree {
