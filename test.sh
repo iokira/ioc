@@ -5,6 +5,8 @@ MAINC=./target/source/main.c
 MAINS=./target/source/main.s
 MAIN=./target/source/main
 
+mkdir -p ./target/source
+
 assert() {
     expected="$1"
     input="$2"
