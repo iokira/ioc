@@ -3,10 +3,12 @@ pub mod parser {
     use crate::token::token::*;
     use crate::tree::tree::*;
 
+    // 式
     pub fn expr(lexer: &mut Lexer) -> Tree {
         equality(lexer)
     }
 
+    // 比較 ==, !=
     fn equality(lexer: &mut Lexer) -> Tree {
         let mut tree = relational(lexer);
         while lexer.expect(OperatorKind::Equality) || lexer.expect(OperatorKind::Nonequality) {
@@ -20,6 +22,7 @@ pub mod parser {
         tree
     }
 
+    // 比較 <, <=, >, >=
     fn relational(lexer: &mut Lexer) -> Tree {
         let mut tree = add(lexer);
         while lexer.expect(OperatorKind::Less)
@@ -43,6 +46,7 @@ pub mod parser {
         tree
     }
 
+    // 加減算 +, -
     fn add(lexer: &mut Lexer) -> Tree {
         let mut tree = mul(lexer);
         while lexer.expect(OperatorKind::Add) || lexer.expect(OperatorKind::Sub) {
@@ -56,6 +60,7 @@ pub mod parser {
         tree
     }
 
+    // 乗除算 *, /
     fn mul(lexer: &mut Lexer) -> Tree {
         let mut tree = unary(lexer);
         while lexer.expect(OperatorKind::Mul) || lexer.expect(OperatorKind::Div) {
@@ -69,6 +74,7 @@ pub mod parser {
         tree
     }
 
+    // 単行演算子 +, -
     fn unary(lexer: &mut Lexer) -> Tree {
         if let Ok(_) = lexer.consume(OperatorKind::Add) {
             return primary(lexer);
@@ -79,6 +85,7 @@ pub mod parser {
         primary(lexer)
     }
 
+    // 数字
     fn primary(lexer: &mut Lexer) -> Tree {
         match lexer.next_token() {
             Ok(Token::Operator(OperatorKind::LParen)) => {

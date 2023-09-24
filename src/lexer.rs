@@ -15,11 +15,14 @@ pub mod lexer {
         }
 
         pub fn next_token(&mut self) -> Result<Token, ErrorToken> {
+            // 空白スキップ
             while self.current_char().is_whitespace() {
                 self.proceed_char(1);
             }
 
             let curr = self.current_char();
+
+            // 数字をまとめる
             let token = if Self::is_number(&curr) {
                 let mut number = vec![curr];
                 while Self::is_number(&self.peek_char(1)) {
@@ -29,6 +32,7 @@ pub mod lexer {
                 let s: String = number.iter().collect();
                 Ok(Token::Operand(s.parse::<f64>().unwrap()))
             } else {
+                // 演算子を変換
                 match curr {
                     '=' if (self.peek_char(1) == '=') => {
                         self.proceed_char(1);
@@ -62,6 +66,8 @@ pub mod lexer {
             return token;
         }
 
+        // 次のトークンが期待している演算子のときはトークンを一つ読み進める
+        // それ以外はErrorTokenで包んで返す
         pub fn consume(&mut self, op: OperatorKind) -> Result<Token, ErrorToken> {
             while self.current_char().is_whitespace() {
                 self.proceed_char(1);
@@ -85,6 +91,7 @@ pub mod lexer {
             }
         }
 
+        // 次のトークンが期待している演算子のときはトークンを一つ読み進める
         pub fn expect(&mut self, op: OperatorKind) -> bool {
             while self.current_char().is_whitespace() {
                 self.proceed_char(1);
@@ -102,10 +109,13 @@ pub mod lexer {
             curr == op_chars
         }
 
+        // 入力n分だけ読み進める
         fn proceed_char(&mut self, n: usize) {
             self.position += n;
         }
 
+        // 現在の文字を返す
+        // ファイル末尾の場合\0を返す
         fn current_char(&mut self) -> char {
             match self.input.get(self.position) {
                 Some(c) => c.clone(),
@@ -113,6 +123,7 @@ pub mod lexer {
             }
         }
 
+        // 入力n分だけ先の文字を取得
         fn peek_char(&mut self, n: usize) -> char {
             match self.input.get(self.position + n) {
                 Some(c) => c.clone(),
@@ -120,12 +131,10 @@ pub mod lexer {
             }
         }
 
+        // 数字の判定
+        // 1.1.1のような文字に対応できるよう修正が必要
         fn is_number(c: &char) -> bool {
             c.is_ascii_digit() || c == &'.'
-        }
-
-        pub fn get_positoin(&mut self) -> usize {
-            self.position
         }
     }
 }

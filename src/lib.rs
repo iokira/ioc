@@ -1,3 +1,4 @@
+pub mod generator;
 pub mod lexer;
 pub mod myerror;
 pub mod parser;
@@ -9,16 +10,19 @@ use std::{
     io::{Read, Write},
 };
 
+use generator::generator::*;
 use lexer::lexer::Lexer;
 use myerror::myerror::*;
 use parser::parser::*;
 use tree::tree::*;
 
+// 引数解析後に格納する構造体
 pub struct Input {
     input_file_name: String,
     output_file_name: String,
 }
 
+// 引数解析器
 impl Input {
     pub fn new(args: &[String]) -> Result<Input, &'static str> {
         if args.len() < 3 {
@@ -35,7 +39,9 @@ impl Input {
     }
 }
 
+// コンパイル処理
 pub fn run(input: Input) -> Result<(), MyError> {
+    // ソースコードを開く
     let mut input_file = match File::open(input.input_file_name) {
         Ok(it) => it,
         Err(err) => {
@@ -45,6 +51,8 @@ pub fn run(input: Input) -> Result<(), MyError> {
             })
         }
     };
+
+    // 出力するアセンブリファイルの用意
     let mut output_file = match File::create(input.output_file_name) {
         Ok(it) => it,
         Err(err) => {
@@ -55,6 +63,7 @@ pub fn run(input: Input) -> Result<(), MyError> {
         }
     };
 
+    // ソースコードを文字列に格納
     let mut contents = String::new();
     match input_file.read_to_string(&mut contents) {
         Ok(it) => it,
@@ -66,6 +75,7 @@ pub fn run(input: Input) -> Result<(), MyError> {
         }
     };
 
+    // 完成したアセンブリをファイルに書き込む
     match construct_assembly(&contents) {
         Ok(a) => {
             let assembly = a;
@@ -94,50 +104,26 @@ pub fn run(input: Input) -> Result<(), MyError> {
     Ok(())
 }
 
+// ソースコードからアセンブリを生成する
 fn construct_assembly(contents: &str) -> Result<String, MyError> {
     let mut assembly = String::new();
+
+    // 字句解析
     let lexer = &mut Lexer::new(contents);
+
+    // 構文解析
     let tree: Tree = expr(lexer);
 
+    // intel syntaxの序文
     assembly.push_str(".intel_syntax noprefix\n");
     assembly.push_str(".globl main\n");
     assembly.push_str("main:\n");
 
+    // 構文木をアセンブリに変換
     generate_assembly(&mut assembly, tree);
 
+    // スタックの最後に残った値をraxに入れret
     assembly.push_str("\tpop rax\n");
     assembly.push_str("\tret\n");
     Ok(assembly)
-}
-
-fn generate_assembly(assembly: &mut String, tree: Tree) {
-    if let Tree::Leaf(n) = tree {
-        let str = format!("\tpush {}\n", n);
-        assembly.push_str(&str);
-        return;
-    }
-
-    if let Tree::Node(kind, lhs, rhs) = tree {
-        generate_assembly(assembly, *lhs);
-        generate_assembly(assembly, *rhs);
-
-        assembly.push_str("\tpop rdi\n");
-        assembly.push_str("\tpop rax\n");
-
-        match kind {
-            NodeKind::Equality => assembly.push_str("\tcmp rax, rdi\n\tsete al\n\tmovzb rax, al\n"),
-            NodeKind::Nonequality => {
-                assembly.push_str("\tcmp rax, rdi\n\tsetne al\n\tmovzb rax, al\n")
-            }
-            NodeKind::Less => assembly.push_str("\tcmp rax, rdi\n\tsetl al\n\tmovzb rax, al\n"),
-            NodeKind::LessOrEqual => {
-                assembly.push_str("\tcmp rax, rdi\n\tsetle al\n\tmovzb rax, al\n")
-            }
-            NodeKind::Add => assembly.push_str("\tadd rax, rdi\n"),
-            NodeKind::Sub => assembly.push_str("\tsub rax, rdi\n"),
-            NodeKind::Mul => assembly.push_str("\timul rax, rdi\n"),
-            NodeKind::Div => assembly.push_str("\tcqo\n\tidiv rdi\n"),
-        }
-        assembly.push_str("\tpush rax\n");
-    }
 }
