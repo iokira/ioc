@@ -38,6 +38,7 @@ pub fn run(input: Input) -> Result<(), MyError> {
         Err(err) => {
             return Err(MyError {
                 message: err.to_string(),
+                position: 0,
             })
         }
     };
@@ -46,6 +47,7 @@ pub fn run(input: Input) -> Result<(), MyError> {
         Err(err) => {
             return Err(MyError {
                 message: err.to_string(),
+                position: 0,
             })
         }
     };
@@ -56,6 +58,7 @@ pub fn run(input: Input) -> Result<(), MyError> {
         Err(err) => {
             return Err(MyError {
                 message: err.to_string(),
+                position: 0,
             })
         }
     };
@@ -68,6 +71,7 @@ pub fn run(input: Input) -> Result<(), MyError> {
                 Err(err) => {
                     return Err(MyError {
                         message: err.to_string(),
+                        position: 0,
                     })
                 }
             };
@@ -76,6 +80,7 @@ pub fn run(input: Input) -> Result<(), MyError> {
                 Err(err) => {
                     return Err(MyError {
                         message: err.to_string(),
+                        position: 0,
                     })
                 }
             };
@@ -111,12 +116,14 @@ fn construct_assembly(contents: &str) -> Result<String, MyError> {
                     _ => {
                         return Err(MyError {
                             message: "unimplemented".to_string(),
+                            position: lexer.get_positoin(),
                         })
                     }
                 },
                 _ => {
                     return Err(MyError {
                         message: "syntax error".to_string(),
+                        position: lexer.get_positoin(),
                     })
                 }
             },
@@ -124,6 +131,7 @@ fn construct_assembly(contents: &str) -> Result<String, MyError> {
             _ => {
                 return Err(MyError {
                     message: "syntax error".to_string(),
+                    position: lexer.get_positoin(),
                 })
             }
         }

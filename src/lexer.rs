@@ -63,6 +63,10 @@ pub mod lexer {
         fn is_number(c: &char) -> bool {
             c.is_ascii_digit() || c == &'.'
         }
+
+        pub fn get_positoin(&mut self) -> usize {
+            self.position
+        }
     }
 }
 
