@@ -31,7 +31,7 @@ pub mod lexer {
                 }
                 let s: String = number.iter().collect();
                 Ok(Token::Operator(OperatorKind::Operand(
-                    s.parse::<f64>().unwrap(),
+                    s.parse::<u32>().unwrap(),
                 )))
             } else {
                 // 演算子を変換
@@ -61,7 +61,7 @@ pub mod lexer {
                     '/' => Ok(Token::Operator(OperatorKind::Div)),
                     '(' => Ok(Token::Operator(OperatorKind::LParen)),
                     ')' => Ok(Token::Operator(OperatorKind::RParen)),
-                    'A'..='Z' | 'a'..='z' => Ok(Token::Operator(OperatorKind::Ident(curr))),
+                    'a'..='z' => Ok(Token::Operator(OperatorKind::Ident(curr))),
                     ';' => Ok(Token::Operator(OperatorKind::Semi)),
                     '\0' => Ok(Token::EOF),
                     _ => Err(ErrorToken::InvaildChar(curr)),
@@ -108,6 +108,21 @@ pub mod lexer {
             }
         }
 
+        pub fn consume_ident(&mut self) -> Result<Token, ErrorToken> {
+            while self.current_char().is_whitespace() {
+                self.proceed_char(1);
+            }
+
+            let curr = self.current_char();
+            match curr {
+                'a'..='z' => {
+                    self.proceed_char(1);
+                    return Ok(Token::Operator(OperatorKind::Ident(curr)));
+                }
+                _ => Err(ErrorToken::InvaildChar(curr)),
+            }
+        }
+
         // 次のトークンが期待している演算子のときはトークンを一つ読み進める
         pub fn expect(&mut self, token: Token) -> bool {
             while self.current_char().is_whitespace() {
@@ -132,6 +147,18 @@ pub mod lexer {
             }
 
             curr == op_chars
+        }
+
+        pub fn expect_ident(&mut self) -> bool {
+            while self.current_char().is_whitespace() {
+                self.proceed_char(1);
+            }
+
+            let curr = self.current_char();
+            match curr {
+                'a'..='z' => return true,
+                _ => return false,
+            }
         }
 
         // 入力n分だけ読み進める
@@ -173,32 +200,32 @@ mod test {
         let mut lexer = Lexer::new("1 +10 - 2*3 + 6/2a == < >= != $;");
         assert_eq!(
             lexer.next_token(),
-            Ok(Token::Operator(OperatorKind::Operand(1.0)))
+            Ok(Token::Operator(OperatorKind::Operand(1)))
         );
         assert_eq!(lexer.next_token(), Ok(Token::Operator(OperatorKind::Add)));
         assert_eq!(
             lexer.next_token(),
-            Ok(Token::Operator(OperatorKind::Operand(10.0)))
+            Ok(Token::Operator(OperatorKind::Operand(10)))
         );
         assert_eq!(lexer.next_token(), Ok(Token::Operator(OperatorKind::Sub)));
         assert_eq!(
             lexer.next_token(),
-            Ok(Token::Operator(OperatorKind::Operand(2.0)))
+            Ok(Token::Operator(OperatorKind::Operand(2)))
         );
         assert_eq!(lexer.next_token(), Ok(Token::Operator(OperatorKind::Mul)));
         assert_eq!(
             lexer.next_token(),
-            Ok(Token::Operator(OperatorKind::Operand(3.0)))
+            Ok(Token::Operator(OperatorKind::Operand(3)))
         );
         assert_eq!(lexer.next_token(), Ok(Token::Operator(OperatorKind::Add)));
         assert_eq!(
             lexer.next_token(),
-            Ok(Token::Operator(OperatorKind::Operand(6.0)))
+            Ok(Token::Operator(OperatorKind::Operand(6)))
         );
         assert_eq!(lexer.next_token(), Ok(Token::Operator(OperatorKind::Div)));
         assert_eq!(
             lexer.next_token(),
-            Ok(Token::Operator(OperatorKind::Operand(2.0)))
+            Ok(Token::Operator(OperatorKind::Operand(2)))
         );
         assert_eq!(
             lexer.next_token(),

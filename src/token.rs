@@ -16,7 +16,7 @@ pub mod token {
     pub enum OperatorKind {
         Ident(char),
         Semi,
-        Operand(f64),
+        Operand(u32),
         Equal,
         Equality,
         Nonequality,

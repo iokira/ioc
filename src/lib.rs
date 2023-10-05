@@ -14,7 +14,6 @@ use generator::generator::*;
 use lexer::lexer::Lexer;
 use myerror::myerror::*;
 use parser::parser::*;
-use tree::tree::*;
 
 // 引数解析後に格納する構造体
 pub struct Input {
@@ -112,18 +111,27 @@ fn construct_assembly(contents: &str) -> Result<String, MyError> {
     let lexer = &mut Lexer::new(contents);
 
     // 構文解析
-    let tree: Tree = program(lexer);
+    let trees = program(lexer);
 
     // intel syntaxの序文
     assembly.push_str(".intel_syntax noprefix\n");
     assembly.push_str(".globl main\n");
     assembly.push_str("main:\n");
 
-    // 構文木をアセンブリに変換
-    generate_assembly(&mut assembly, tree);
+    // 変数26個分の領域を確保
+    assembly.push_str("\tpush rbp\n");
+    assembly.push_str("\tmov rbp, rsp\n");
+    assembly.push_str("\tsub rsp, 208\n");
 
-    // スタックの最後に残った値をraxに入れret
-    assembly.push_str("\tpop rax\n");
+    // 構文木をアセンブリに変換
+    for tree in trees {
+        generate_assembly(&mut assembly, tree);
+        assembly.push_str("\tpop rax\n");
+    }
+
+    // 最後の式の結果がraxに残り、返される
+    assembly.push_str("\tmov rsp, rbp\n");
+    assembly.push_str("\tpop rbp\n");
     assembly.push_str("\tret\n");
     Ok(assembly)
 }

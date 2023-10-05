@@ -1,6 +1,12 @@
 pub mod generator {
     use crate::tree::tree::*;
 
+    fn generate_val(assembly: &mut String, offset: u32) {
+        let str = format!("\tmov rax, rbp\n\tsub rax, {}\n\tpush rax\n", offset);
+        assembly.push_str(&str);
+        return;
+    }
+
     // 構文木をアセンブリに変換する
     pub fn generate_assembly(assembly: &mut String, tree: Tree) {
         if let Tree::Num(n) = tree {
@@ -9,7 +15,26 @@ pub mod generator {
             return;
         }
 
+        if let Tree::Val(o) = tree {
+            generate_val(assembly, o);
+            let str = format!("\tpop rax\n\tmov rax. [rax]\n\tpush rax\n");
+            assembly.push_str(&str);
+            return;
+        }
+
         if let Tree::Node(kind, lhs, rhs) = tree {
+            if let NodeKind::Assign = kind {
+                if let Tree::Val(o) = *lhs {
+                    generate_val(assembly, o);
+                } else {
+                    panic!("The left-hand side value of the assignment is not a variable")
+                }
+                generate_assembly(assembly, *rhs);
+                let str = format!("\tpop rdi\n\tpop rax\n\tmov [rax], rdi\n\tpush rdi\n");
+                assembly.push_str(&str);
+                return;
+            }
+
             generate_assembly(assembly, *lhs);
             generate_assembly(assembly, *rhs);
 
