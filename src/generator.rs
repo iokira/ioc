@@ -3,7 +3,7 @@ pub mod generator {
 
     // 構文木をアセンブリに変換する
     pub fn generate_assembly(assembly: &mut String, tree: Tree) {
-        if let Tree::Leaf(n) = tree {
+        if let Tree::Num(n) = tree {
             let str = format!("\tpush {}\n", n);
             assembly.push_str(&str);
             return;
@@ -31,6 +31,8 @@ pub mod generator {
                 NodeKind::Sub => assembly.push_str("\tsub rax, rdi\n"),
                 NodeKind::Mul => assembly.push_str("\timul rax, rdi\n"),
                 NodeKind::Div => assembly.push_str("\tcqo\n\tidiv rdi\n"),
+                NodeKind::Assign => unimplemented!(),
+                NodeKind::VAL => unimplemented!(),
             }
             assembly.push_str("\tpush rax\n");
         }

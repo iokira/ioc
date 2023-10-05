@@ -1,19 +1,22 @@
 pub mod tree {
     #[derive(Debug, PartialEq)]
     pub enum NodeKind {
-        Equality,
-        Nonequality,
-        Less,
-        LessOrEqual,
-        Add,
-        Sub,
-        Mul,
-        Div,
+        Assign,      // =
+        VAL,         // value
+        Equality,    // ==
+        Nonequality, // !=
+        Less,        // <
+        LessOrEqual, // <=
+        Add,         // +
+        Sub,         // -
+        Mul,         // *
+        Div,         // /
     }
 
     #[derive(Debug, PartialEq)]
     pub enum Tree {
-        Leaf(f64),
+        Num(f64),
+        Val(f64),
         Node(NodeKind, Box<Tree>, Box<Tree>),
     }
 
@@ -23,7 +26,7 @@ pub mod tree {
         }
 
         pub fn new_leaf(num: f64) -> Tree {
-            Tree::Leaf(num)
+            Tree::Num(num)
         }
     }
 }

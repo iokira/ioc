@@ -40,6 +40,7 @@ pub mod lexer {
                         self.proceed_char(1);
                         Ok(Token::Operator(OperatorKind::Equality))
                     }
+                    '=' => Ok(Token::Operator(OperatorKind::Equal)),
                     '!' if (self.peek_char(1) == '=') => {
                         self.proceed_char(1);
                         Ok(Token::Operator(OperatorKind::Nonequality))
@@ -72,10 +73,22 @@ pub mod lexer {
 
         // 次のトークンが期待している演算子のときはトークンを一つ読み進める
         // それ以外はErrorTokenで包んで返す
-        pub fn consume(&mut self, op: OperatorKind) -> Result<Token, ErrorToken> {
+        pub fn consume(&mut self, token: Token) -> Result<Token, ErrorToken> {
             while self.current_char().is_whitespace() {
                 self.proceed_char(1);
             }
+
+            let op = match token {
+                Token::Operator(o) => o,
+                Token::EOF => {
+                    let curr = self.current_char();
+                    if curr == '\0' {
+                        return Ok(Token::EOF);
+                    } else {
+                        return Err(ErrorToken::InvaildChar(curr));
+                    }
+                }
+            };
 
             let op_chars = format!("{}", op);
             let op_chars_len = op_chars.len();
@@ -96,10 +109,18 @@ pub mod lexer {
         }
 
         // 次のトークンが期待している演算子のときはトークンを一つ読み進める
-        pub fn expect(&mut self, op: OperatorKind) -> bool {
+        pub fn expect(&mut self, token: Token) -> bool {
             while self.current_char().is_whitespace() {
                 self.proceed_char(1);
             }
+
+            let op = match token {
+                Token::Operator(o) => o,
+                Token::EOF => {
+                    let curr = self.current_char();
+                    return curr == '\0';
+                }
+            };
 
             let op_chars = format!("{}", op);
             let op_chars_len = op_chars.len();
