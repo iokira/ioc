@@ -37,6 +37,7 @@ assert 10 "-10+20;"
 assert 1 "1==1;"
 assert 1 "2 *3!=3-1;"
 assert 0 "32/(1==1)<2;"
-assert 0 "a = 3; b = 5*6-8; a + b / 2;"
+assert 2 "a=1+1;a;"
+assert 14 "a = 3; b = 5*6 - 8; a + b / 2;"
 
 echo OK
