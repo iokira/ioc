@@ -3,8 +3,27 @@ pub mod parser {
     use crate::token::token::*;
     use crate::tree::tree::*;
 
+    // プログラム
+    pub fn program(lexer: &mut Lexer) -> Tree {
+        stmt(lexer)
+    }
+
+    // 命令
+    fn stmt(lexer: &mut Lexer) -> Tree {
+        let tree = expr(lexer);
+        if let Err(_) = lexer.consume(OperatorKind::Semi) {
+            panic!("expected semi");
+        }
+        tree
+    }
+
     // 式
-    pub fn expr(lexer: &mut Lexer) -> Tree {
+    fn expr(lexer: &mut Lexer) -> Tree {
+        assign(lexer)
+    }
+
+    // 代入式
+    fn assign(lexer: &mut Lexer) -> Tree {
         equality(lexer)
     }
 
@@ -107,9 +126,9 @@ mod test {
 
     #[test]
     fn test_parser() {
-        let lexer1 = &mut Lexer::new("1+1");
+        let lexer1 = &mut Lexer::new("1+1;");
         assert_eq!(
-            expr(lexer1),
+            program(lexer1),
             Tree::Node(
                 NodeKind::Add,
                 Box::new(Tree::Leaf(1.0)),
@@ -117,9 +136,9 @@ mod test {
             )
         );
 
-        let lexer2 = &mut Lexer::new("1+1*2");
+        let lexer2 = &mut Lexer::new("1+1*2;");
         assert_eq!(
-            expr(lexer2),
+            program(lexer2),
             Tree::Node(
                 NodeKind::Add,
                 Box::new(Tree::Leaf(1.0)),
@@ -131,9 +150,9 @@ mod test {
             )
         );
 
-        let lexer3 = &mut Lexer::new("3 * (2 + 3) - (6 / 2 + 2)");
+        let lexer3 = &mut Lexer::new("3 * (2 + 3) - (6 / 2 + 2);");
         assert_eq!(
-            expr(lexer3),
+            program(lexer3),
             Tree::Node(
                 NodeKind::Sub,
                 Box::new(Tree::Node(
@@ -157,9 +176,9 @@ mod test {
             )
         );
 
-        let lexer4 = &mut Lexer::new("5 + 6 * 7");
+        let lexer4 = &mut Lexer::new("5 + 6 * 7;");
         assert_eq!(
-            expr(lexer4),
+            program(lexer4),
             Tree::Node(
                 NodeKind::Add,
                 Box::new(Tree::Leaf(5.0)),
@@ -171,9 +190,9 @@ mod test {
             )
         );
 
-        let lexer5 = &mut Lexer::new("2 * 3 == 3 + 1");
+        let lexer5 = &mut Lexer::new("2 * 3 == 3 + 1;");
         assert_eq!(
-            expr(lexer5),
+            program(lexer5),
             Tree::Node(
                 NodeKind::Equality,
                 Box::new(Tree::Node(

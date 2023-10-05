@@ -112,7 +112,7 @@ fn construct_assembly(contents: &str) -> Result<String, MyError> {
     let lexer = &mut Lexer::new(contents);
 
     // 構文解析
-    let tree: Tree = expr(lexer);
+    let tree: Tree = program(lexer);
 
     // intel syntaxの序文
     assembly.push_str(".intel_syntax noprefix\n");

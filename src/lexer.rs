@@ -60,6 +60,8 @@ pub mod lexer {
                     '/' => Ok(Token::Operator(OperatorKind::Div)),
                     '(' => Ok(Token::Operator(OperatorKind::LParen)),
                     ')' => Ok(Token::Operator(OperatorKind::RParen)),
+                    'A'..='Z' | 'a'..='z' => Ok(Token::Operator(OperatorKind::Ident(curr))),
+                    ';' => Ok(Token::Operator(OperatorKind::Semi)),
                     '\0' => Ok(Token::EOF),
                     _ => Err(ErrorToken::InvaildChar(curr)),
                 }
@@ -147,7 +149,7 @@ mod test {
 
     #[test]
     fn test_lexer() {
-        let mut lexer = Lexer::new("1 +10 - 2*3 + 6/2a == < >= !==");
+        let mut lexer = Lexer::new("1 +10 - 2*3 + 6/2a == < >= != $;");
         assert_eq!(
             lexer.next_token(),
             Ok(Token::Operator(OperatorKind::Operand(1.0)))
@@ -177,7 +179,10 @@ mod test {
             lexer.next_token(),
             Ok(Token::Operator(OperatorKind::Operand(2.0)))
         );
-        assert_eq!(lexer.next_token(), Err(ErrorToken::InvaildChar('a')));
+        assert_eq!(
+            lexer.next_token(),
+            Ok(Token::Operator(OperatorKind::Ident('a')))
+        );
         assert_eq!(
             lexer.next_token(),
             Ok(Token::Operator(OperatorKind::Equality))
@@ -191,7 +196,8 @@ mod test {
             lexer.next_token(),
             Ok(Token::Operator(OperatorKind::Nonequality))
         );
-        assert_eq!(lexer.next_token(), Err(ErrorToken::InvaildChar('=')));
+        assert_eq!(lexer.next_token(), Err(ErrorToken::InvaildChar('$')));
+        assert_eq!(lexer.next_token(), Ok(Token::Operator(OperatorKind::Semi)));
         assert_eq!(lexer.next_token(), Ok(Token::EOF));
     }
 }
