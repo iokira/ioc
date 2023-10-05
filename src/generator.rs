@@ -17,7 +17,7 @@ pub mod generator {
 
         if let Tree::Val(o) = tree {
             generate_val(assembly, o);
-            let str = format!("\tpop rax\n\tmov rax. [rax]\n\tpush rax\n");
+            let str = format!("\tpop rax\n\tmov rax, [rax]\n\tpush rax\n");
             assembly.push_str(&str);
             return;
         }
