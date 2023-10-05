@@ -95,7 +95,7 @@ pub mod parser {
                     _ => panic!("expect ')' but disappear"),
                 }
             }
-            Ok(Token::Operand(n)) => return Tree::new_leaf(n),
+            Ok(Token::Operator(OperatorKind::Operand(n))) => return Tree::new_leaf(n),
             _ => panic!("expect number or block but disappear"),
         }
     }

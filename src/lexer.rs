@@ -30,7 +30,9 @@ pub mod lexer {
                     number.push(self.current_char());
                 }
                 let s: String = number.iter().collect();
-                Ok(Token::Operand(s.parse::<f64>().unwrap()))
+                Ok(Token::Operator(OperatorKind::Operand(
+                    s.parse::<f64>().unwrap(),
+                )))
             } else {
                 // 演算子を変換
                 match curr {
@@ -146,17 +148,35 @@ mod test {
     #[test]
     fn test_lexer() {
         let mut lexer = Lexer::new("1 +10 - 2*3 + 6/2a == < >= !==");
-        assert_eq!(lexer.next_token(), Ok(Token::Operand(1.0)));
+        assert_eq!(
+            lexer.next_token(),
+            Ok(Token::Operator(OperatorKind::Operand(1.0)))
+        );
         assert_eq!(lexer.next_token(), Ok(Token::Operator(OperatorKind::Add)));
-        assert_eq!(lexer.next_token(), Ok(Token::Operand(10.0)));
+        assert_eq!(
+            lexer.next_token(),
+            Ok(Token::Operator(OperatorKind::Operand(10.0)))
+        );
         assert_eq!(lexer.next_token(), Ok(Token::Operator(OperatorKind::Sub)));
-        assert_eq!(lexer.next_token(), Ok(Token::Operand(2.0)));
+        assert_eq!(
+            lexer.next_token(),
+            Ok(Token::Operator(OperatorKind::Operand(2.0)))
+        );
         assert_eq!(lexer.next_token(), Ok(Token::Operator(OperatorKind::Mul)));
-        assert_eq!(lexer.next_token(), Ok(Token::Operand(3.0)));
+        assert_eq!(
+            lexer.next_token(),
+            Ok(Token::Operator(OperatorKind::Operand(3.0)))
+        );
         assert_eq!(lexer.next_token(), Ok(Token::Operator(OperatorKind::Add)));
-        assert_eq!(lexer.next_token(), Ok(Token::Operand(6.0)));
+        assert_eq!(
+            lexer.next_token(),
+            Ok(Token::Operator(OperatorKind::Operand(6.0)))
+        );
         assert_eq!(lexer.next_token(), Ok(Token::Operator(OperatorKind::Div)));
-        assert_eq!(lexer.next_token(), Ok(Token::Operand(2.0)));
+        assert_eq!(
+            lexer.next_token(),
+            Ok(Token::Operator(OperatorKind::Operand(2.0)))
+        );
         assert_eq!(lexer.next_token(), Err(ErrorToken::InvaildChar('a')));
         assert_eq!(
             lexer.next_token(),

@@ -4,7 +4,6 @@ pub mod token {
     #[derive(Debug, PartialEq)]
     pub enum Token {
         Operator(OperatorKind),
-        Operand(f64),
         EOF,
     }
 
@@ -15,6 +14,9 @@ pub mod token {
 
     #[derive(Debug, PartialEq)]
     pub enum OperatorKind {
+        Ident(char),
+        Semi,
+        Operand(f64),
         Equality,
         Nonequality,
         Less,
@@ -32,6 +34,9 @@ pub mod token {
     impl fmt::Display for OperatorKind {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             match *self {
+                OperatorKind::Ident(c) => write!(f, "{}", c),
+                OperatorKind::Semi => write!(f, ";"),
+                OperatorKind::Operand(n) => write!(f, "{}", n),
                 OperatorKind::Equality => write!(f, "=="),
                 OperatorKind::Nonequality => write!(f, "!="),
                 OperatorKind::Less => write!(f, "<"),
