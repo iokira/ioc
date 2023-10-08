@@ -31,7 +31,7 @@ pub mod lexer {
                 }
                 let s: String = number.iter().collect();
                 Ok(Token::Operator(OperatorKind::Operand(
-                    s.parse::<u32>().unwrap(),
+                    s.parse::<usize>().unwrap(),
                 )))
             } else {
                 // 演算子を変換

@@ -1,7 +1,7 @@
 pub mod generator {
     use crate::tree::tree::*;
 
-    fn generate_val(assembly: &mut String, offset: u32) {
+    fn generate_val(assembly: &mut String, offset: usize) {
         let str = format!("\tmov rax, rbp\n\tsub rax, {}\n\tpush rax\n", offset);
         assembly.push_str(&str);
         return;

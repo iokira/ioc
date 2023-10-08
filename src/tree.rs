@@ -15,8 +15,8 @@ pub mod tree {
 
     #[derive(Debug, PartialEq)]
     pub enum Tree {
-        Num(u32),
-        Val(u32),
+        Num(usize),
+        Val(usize),
         Node(NodeKind, Box<Tree>, Box<Tree>),
     }
 
@@ -25,12 +25,12 @@ pub mod tree {
             Tree::Node(kind, Box::new(lhs), Box::new(rhs))
         }
 
-        pub fn new_num(num: u32) -> Tree {
+        pub fn new_num(num: usize) -> Tree {
             Tree::Num(num)
         }
 
         pub fn new_val(c: char) -> Tree {
-            Tree::Val((c as u32 - 'a' as u32 + 1) * 8)
+            Tree::Val((c as usize - 'a' as usize + 1) * 8)
         }
     }
 }
