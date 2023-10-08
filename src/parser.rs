@@ -15,7 +15,7 @@ pub mod parser {
     // 命令
     fn stmt(lexer: &mut Lexer) -> Tree {
         let tree = expr(lexer);
-        if let Err(_) = lexer.consume(Token::Operator(OperatorKind::Semi)) {
+        if lexer.consume(Token::Operator(OperatorKind::Semi)).is_err() {
             panic!("expected semi");
         }
         tree
@@ -29,7 +29,7 @@ pub mod parser {
     // 代入式
     fn assign(lexer: &mut Lexer) -> Tree {
         let mut tree = equality(lexer);
-        if let Ok(_) = lexer.consume(Token::Operator(OperatorKind::Equal)) {
+        if lexer.consume(Token::Operator(OperatorKind::Equal)).is_ok() {
             tree = Tree::new_tree(NodeKind::Assign, tree, assign(lexer));
         }
         tree
@@ -41,10 +41,10 @@ pub mod parser {
         while lexer.expect(Token::Operator(OperatorKind::Equality))
             || lexer.expect(Token::Operator(OperatorKind::Nonequality))
         {
-            if let Ok(_) = lexer.consume(Token::Operator(OperatorKind::Equality)) {
+            if lexer.consume(Token::Operator(OperatorKind::Equality)).is_ok() {
                 tree = Tree::new_tree(NodeKind::Equality, tree, relational(lexer));
             }
-            if let Ok(_) = lexer.consume(Token::Operator(OperatorKind::Nonequality)) {
+            if lexer.consume(Token::Operator(OperatorKind::Nonequality)).is_ok() {
                 tree = Tree::new_tree(NodeKind::Nonequality, tree, relational(lexer));
             }
         }
@@ -59,16 +59,16 @@ pub mod parser {
             || lexer.expect(Token::Operator(OperatorKind::Greater))
             || lexer.expect(Token::Operator(OperatorKind::GreaterOrEqual))
         {
-            if let Ok(_) = lexer.consume(Token::Operator(OperatorKind::Less)) {
+            if lexer.consume(Token::Operator(OperatorKind::Less)).is_ok() {
                 tree = Tree::new_tree(NodeKind::Less, tree, add(lexer));
             }
-            if let Ok(_) = lexer.consume(Token::Operator(OperatorKind::LessOrEqual)) {
+            if lexer.consume(Token::Operator(OperatorKind::LessOrEqual)).is_ok() {
                 tree = Tree::new_tree(NodeKind::LessOrEqual, tree, add(lexer));
             }
-            if let Ok(_) = lexer.consume(Token::Operator(OperatorKind::Greater)) {
+            if lexer.consume(Token::Operator(OperatorKind::Greater)).is_ok() {
                 tree = Tree::new_tree(NodeKind::Less, add(lexer), tree);
             }
-            if let Ok(_) = lexer.consume(Token::Operator(OperatorKind::GreaterOrEqual)) {
+            if lexer.consume(Token::Operator(OperatorKind::GreaterOrEqual)).is_ok() {
                 tree = Tree::new_tree(NodeKind::LessOrEqual, add(lexer), tree);
             }
         }
@@ -81,10 +81,10 @@ pub mod parser {
         while lexer.expect(Token::Operator(OperatorKind::Add))
             || lexer.expect(Token::Operator(OperatorKind::Sub))
         {
-            if let Ok(_) = lexer.consume(Token::Operator(OperatorKind::Add)) {
+            if lexer.consume(Token::Operator(OperatorKind::Add)).is_ok() {
                 tree = Tree::new_tree(NodeKind::Add, tree, mul(lexer));
             }
-            if let Ok(_) = lexer.consume(Token::Operator(OperatorKind::Sub)) {
+            if lexer.consume(Token::Operator(OperatorKind::Sub)).is_ok() {
                 tree = Tree::new_tree(NodeKind::Sub, tree, mul(lexer));
             }
         }
@@ -97,10 +97,10 @@ pub mod parser {
         while lexer.expect(Token::Operator(OperatorKind::Mul))
             || lexer.expect(Token::Operator(OperatorKind::Div))
         {
-            if let Ok(_) = lexer.consume(Token::Operator(OperatorKind::Mul)) {
+            if lexer.consume(Token::Operator(OperatorKind::Mul)).is_ok() {
                 tree = Tree::new_tree(NodeKind::Mul, tree, unary(lexer));
             }
-            if let Ok(_) = lexer.consume(Token::Operator(OperatorKind::Div)) {
+            if lexer.consume(Token::Operator(OperatorKind::Div)).is_ok() {
                 tree = Tree::new_tree(NodeKind::Div, tree, unary(lexer));
             }
         }
@@ -109,10 +109,10 @@ pub mod parser {
 
     // 単行演算子 +, -
     fn unary(lexer: &mut Lexer) -> Tree {
-        if let Ok(_) = lexer.consume(Token::Operator(OperatorKind::Add)) {
+        if lexer.consume(Token::Operator(OperatorKind::Add)).is_ok() {
             return primary(lexer);
         }
-        if let Ok(_) = lexer.consume(Token::Operator(OperatorKind::Sub)) {
+        if lexer.consume(Token::Operator(OperatorKind::Sub)).is_ok() {
             return Tree::new_tree(NodeKind::Sub, Tree::Num(0), primary(lexer));
         }
         primary(lexer)
@@ -124,12 +124,12 @@ pub mod parser {
             Ok(Token::Operator(OperatorKind::LParen)) => {
                 let tree = expr(lexer);
                 match lexer.consume(Token::Operator(OperatorKind::RParen)) {
-                    Ok(_) => return tree,
+                    Ok(_) => tree,
                     _ => panic!("expect ')' but disappear"),
                 }
             }
-            Ok(Token::Operator(OperatorKind::Operand(n))) => return Tree::new_num(n),
-            Ok(Token::Operator(OperatorKind::Ident(c))) => return Tree::new_val(c),
+            Ok(Token::Operator(OperatorKind::Operand(n))) => Tree::new_num(n),
+            Ok(Token::Operator(OperatorKind::Ident(c))) => Tree::new_val(c),
             _ => panic!("expect number or block but disappear"),
         }
     }

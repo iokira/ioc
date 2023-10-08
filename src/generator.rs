@@ -4,7 +4,6 @@ pub mod generator {
     fn generate_val(assembly: &mut String, offset: usize) {
         let str = format!("\tmov rax, rbp\n\tsub rax, {}\n\tpush rax\n", offset);
         assembly.push_str(&str);
-        return;
     }
 
     // 構文木をアセンブリに変換する
@@ -17,7 +16,7 @@ pub mod generator {
 
         if let Tree::Val(o) = tree {
             generate_val(assembly, o);
-            let str = format!("\tpop rax\n\tmov rax, [rax]\n\tpush rax\n");
+            let str = "\tpop rax\n\tmov rax, [rax]\n\tpush rax\n".to_string();
             assembly.push_str(&str);
             return;
         }
@@ -30,7 +29,7 @@ pub mod generator {
                     panic!("The left-hand side value of the assignment is not a variable")
                 }
                 generate_assembly(assembly, *rhs);
-                let str = format!("\tpop rdi\n\tpop rax\n\tmov [rax], rdi\n\tpush rdi\n");
+                let str = "\tpop rdi\n\tpop rax\n\tmov [rax], rdi\n\tpush rdi\n".to_string();
                 assembly.push_str(&str);
                 return;
             }

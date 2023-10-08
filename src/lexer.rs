@@ -68,7 +68,7 @@ pub mod lexer {
                 }
             };
             self.proceed_char(1);
-            return token;
+            token
         }
 
         // 次のトークンが期待している演算子のときはトークンを一つ読み進める
@@ -117,7 +117,7 @@ pub mod lexer {
             match curr {
                 'a'..='z' => {
                     self.proceed_char(1);
-                    return Ok(Token::Operator(OperatorKind::Ident(curr)));
+                    Ok(Token::Operator(OperatorKind::Ident(curr)))
                 }
                 _ => Err(ErrorToken::InvaildChar(curr)),
             }
@@ -156,8 +156,8 @@ pub mod lexer {
 
             let curr = self.current_char();
             match curr {
-                'a'..='z' => return true,
-                _ => return false,
+                'a'..='z' => true,
+                _ => false,
             }
         }
 
@@ -170,7 +170,7 @@ pub mod lexer {
         // ファイル末尾の場合\0を返す
         fn current_char(&mut self) -> char {
             match self.input.get(self.position) {
-                Some(c) => c.clone(),
+                Some(c) => *c,
                 None => '\0',
             }
         }
@@ -178,7 +178,7 @@ pub mod lexer {
         // 入力n分だけ先の文字を取得
         fn peek_char(&mut self, n: usize) -> char {
             match self.input.get(self.position + n) {
-                Some(c) => c.clone(),
+                Some(c) => *c,
                 None => '\0',
             }
         }
