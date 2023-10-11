@@ -1,5 +1,5 @@
-pub mod tree {
-    use crate::{lexer::lexer::Lexer, numtype::numtype::NumType, token::token::Ident};
+pub mod mytree {
+    use crate::{lexer::mylexer::Lexer, numtype::mynumtype::NumType, token::mytoken::Ident};
 
     #[derive(Debug, PartialEq)]
     pub enum NodeKind {

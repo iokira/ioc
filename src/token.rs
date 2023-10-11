@@ -1,7 +1,7 @@
-pub mod token {
+pub mod mytoken {
     use core::fmt;
 
-    use crate::numtype::numtype::NumType;
+    use crate::numtype::mynumtype::NumType;
 
     #[derive(Debug, PartialEq)]
     pub enum Token {

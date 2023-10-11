@@ -1,5 +1,5 @@
-pub mod generator {
-    use crate::tree::tree::*;
+pub mod mygenerator {
+    use crate::tree::mytree::*;
 
     fn generate_val(assembly: &mut String, offset: usize) {
         let str = format!("\tmov rax, rbp\n\tsub rax, {}\n\tpush rax\n", offset);

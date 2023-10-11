@@ -1,5 +1,5 @@
-pub mod lexer {
-    use crate::{numtype::numtype::NumType, token::token::*};
+pub mod mylexer {
+    use crate::{numtype::mynumtype::NumType, token::mytoken::*};
 
     pub struct Lexer {
         input: Vec<char>,
@@ -230,7 +230,7 @@ pub mod lexer {
 
 #[cfg(test)]
 mod test {
-    use crate::{lexer::lexer::Lexer, token::token::*};
+    use crate::{lexer::mylexer::Lexer, token::mytoken::*};
 
     #[test]
     fn test_lexer() {

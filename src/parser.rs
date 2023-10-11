@@ -1,7 +1,7 @@
-pub mod parser {
-    use crate::lexer::lexer::Lexer;
-    use crate::token::token::*;
-    use crate::tree::tree::*;
+pub mod myparser {
+    use crate::lexer::mylexer::Lexer;
+    use crate::token::mytoken::*;
+    use crate::tree::mytree::*;
 
     // プログラム
     pub fn program(lexer: &mut Lexer) -> (Vec<Tree>, &mut Lexer) {
@@ -152,7 +152,7 @@ pub mod parser {
 
 #[cfg(test)]
 mod test {
-    use crate::{lexer::lexer::Lexer, parser::parser::*, tree::tree::*};
+    use crate::{lexer::mylexer::Lexer, parser::myparser::*, tree::mytree::*};
 
     #[test]
     fn test_parser() {

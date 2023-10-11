@@ -1,7 +1,7 @@
 pub mod architecture;
+pub mod error;
 pub mod generator;
 pub mod lexer;
-pub mod myerror;
 pub mod numtype;
 pub mod parser;
 pub mod token;
@@ -12,11 +12,11 @@ use std::{
     io::{Read, Write},
 };
 
-use architecture::architecture::*;
-use generator::generator::*;
-use lexer::lexer::Lexer;
-use myerror::myerror::*;
-use parser::parser::*;
+use architecture::myarchitecture::*;
+use error::myerror::*;
+use generator::mygenerator::*;
+use lexer::mylexer::Lexer;
+use parser::myparser::*;
 
 // 引数解析後に格納する構造体
 pub struct Input {

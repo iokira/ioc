@@ -1,3 +1,3 @@
-pub mod numtype {
+pub mod mynumtype {
     pub type NumType = usize;
 }

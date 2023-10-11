@@ -1,4 +1,4 @@
-pub mod architecture {
+pub mod myarchitecture {
     use core::fmt;
 
     pub enum Register {
