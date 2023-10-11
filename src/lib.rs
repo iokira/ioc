@@ -1,3 +1,4 @@
+pub mod architecture;
 pub mod generator;
 pub mod lexer;
 pub mod myerror;
@@ -11,6 +12,7 @@ use std::{
     io::{Read, Write},
 };
 
+use architecture::architecture::*;
 use generator::generator::*;
 use lexer::lexer::Lexer;
 use myerror::myerror::*;
@@ -115,12 +117,15 @@ fn construct_assembly(contents: &str) -> Result<String, MyError> {
     let (trees, lexer) = program(lexer);
     let ident_count = lexer.get_ident_count();
 
-    // intel syntaxの序文
-    assembly.push_str(".intel_syntax noprefix\n");
-    assembly.push_str(".globl main\n");
-    assembly.push_str("main:\n");
+    // intel syntaxの宣言
+    if cfg!(target_arch = "x86_64") {
+        assembly.push_str(&intel_syntax());
+    }
 
-    // 変数26個分の領域を確保
+    // main関数
+    assembly.push_str(&main_func());
+
+    // 変数の領域を確保
     assembly.push_str("\tpush rbp\n");
     assembly.push_str("\tmov rbp, rsp\n");
     assembly.push_str(&format!("\tsub rsp, {}\n", ident_count * 8));
@@ -134,6 +139,6 @@ fn construct_assembly(contents: &str) -> Result<String, MyError> {
     // 最後の式の結果がraxに残り、返される
     assembly.push_str("\tmov rsp, rbp\n");
     assembly.push_str("\tpop rbp\n");
-    assembly.push_str("\tret\n");
+    assembly.push_str(&ret());
     Ok(assembly)
 }
