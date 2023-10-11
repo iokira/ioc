@@ -3,7 +3,8 @@ pub mod lexer {
 
     pub struct Lexer {
         input: Vec<char>,
-        position: NumType,
+        position: usize,
+        idents: Vec<Ident>,
     }
 
     impl Lexer {
@@ -11,6 +12,7 @@ pub mod lexer {
             Lexer {
                 input: input.chars().collect(),
                 position: 0,
+                idents: vec![],
             }
         }
 
@@ -33,6 +35,15 @@ pub mod lexer {
                 Ok(Token::Operator(OperatorKind::Operand(
                     s.parse::<NumType>().unwrap(),
                 )))
+            } else if Self::is_ident_char(&curr) {
+                let mut ident = vec![curr];
+                while Self::is_ident_char(&self.peek_char(1)) {
+                    self.proceed_char(1);
+                    ident.push(self.current_char());
+                }
+                Ok(Token::Operator(OperatorKind::Ident(Ident::new(
+                    &ident.iter().collect::<String>(),
+                ))))
             } else {
                 // 演算子を変換
                 match curr {
@@ -61,7 +72,6 @@ pub mod lexer {
                     '/' => Ok(Token::Operator(OperatorKind::Div)),
                     '(' => Ok(Token::Operator(OperatorKind::LParen)),
                     ')' => Ok(Token::Operator(OperatorKind::RParen)),
-                    'a'..='z' => Ok(Token::Operator(OperatorKind::Ident(curr))),
                     ';' => Ok(Token::Operator(OperatorKind::Semi)),
                     '\0' => Ok(Token::EOF),
                     _ => Err(ErrorToken::InvaildChar(curr)),
@@ -114,13 +124,21 @@ pub mod lexer {
             }
 
             let curr = self.current_char();
-            match curr {
-                'a'..='z' => {
+
+            let token = if Self::is_ident_char(&curr) {
+                let mut ident = vec![curr];
+                while Self::is_ident_char(&self.peek_char(1)) {
                     self.proceed_char(1);
-                    Ok(Token::Operator(OperatorKind::Ident(curr)))
+                    ident.push(self.current_char());
                 }
-                _ => Err(ErrorToken::InvaildChar(curr)),
-            }
+                Ok(Token::Operator(OperatorKind::Ident(Ident::new(
+                    &ident.iter().collect::<String>(),
+                ))))
+            } else {
+                return Err(ErrorToken::InvaildChar(curr));
+            };
+
+            token
         }
 
         // 次のトークンが期待している演算子のときはトークンを一つ読み進める
@@ -155,14 +173,11 @@ pub mod lexer {
             }
 
             let curr = self.current_char();
-            match curr {
-                'a'..='z' => true,
-                _ => false,
-            }
+            Self::is_ident_char(&curr)
         }
 
         // 入力n分だけ読み進める
-        fn proceed_char(&mut self, n: NumType) {
+        fn proceed_char(&mut self, n: usize) {
             self.position += n;
         }
 
@@ -176,7 +191,7 @@ pub mod lexer {
         }
 
         // 入力n分だけ先の文字を取得
-        fn peek_char(&mut self, n: NumType) -> char {
+        fn peek_char(&mut self, n: usize) -> char {
             match self.input.get(self.position + n) {
                 Some(c) => *c,
                 None => '\0',
@@ -187,6 +202,28 @@ pub mod lexer {
         // 1.1.1のような文字に対応できるよう修正が必要
         fn is_number(c: &char) -> bool {
             c.is_ascii_digit() || c == &'.'
+        }
+
+        fn is_ident_char(c: &char) -> bool {
+            c.is_alphabetic() || c == &'_'
+        }
+
+        fn push_ident(&mut self, ident: Ident) {
+            self.idents.push(ident);
+        }
+
+        pub fn calc_offset(&mut self, ident: Ident) -> usize {
+            match self.idents.iter().position(|i| *i == ident) {
+                Some(index) => (index + 1) * 8,
+                None => {
+                    self.push_ident(ident);
+                    self.idents.len() * 8
+                }
+            }
+        }
+
+        pub fn get_ident_count(&mut self) -> usize {
+            self.idents.len()
         }
     }
 }
@@ -229,7 +266,7 @@ mod test {
         );
         assert_eq!(
             lexer.next_token(),
-            Ok(Token::Operator(OperatorKind::Ident('a')))
+            Ok(Token::Operator(OperatorKind::Ident(Ident::new("a"))))
         );
         assert_eq!(
             lexer.next_token(),

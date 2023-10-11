@@ -112,7 +112,8 @@ fn construct_assembly(contents: &str) -> Result<String, MyError> {
     let lexer = &mut Lexer::new(contents);
 
     // 構文解析
-    let trees = program(lexer);
+    let (trees, lexer) = program(lexer);
+    let ident_count = lexer.get_ident_count();
 
     // intel syntaxの序文
     assembly.push_str(".intel_syntax noprefix\n");
@@ -122,7 +123,7 @@ fn construct_assembly(contents: &str) -> Result<String, MyError> {
     // 変数26個分の領域を確保
     assembly.push_str("\tpush rbp\n");
     assembly.push_str("\tmov rbp, rsp\n");
-    assembly.push_str("\tsub rsp, 208\n");
+    assembly.push_str(&format!("\tsub rsp, {}\n", ident_count));
 
     // 構文木をアセンブリに変換
     for tree in trees {

@@ -16,7 +16,7 @@ pub mod token {
 
     #[derive(Debug, PartialEq)]
     pub enum OperatorKind {
-        Ident(char),
+        Ident(Ident),
         Semi,
         Operand(NumType),
         Equal,
@@ -34,10 +34,23 @@ pub mod token {
         RParen,
     }
 
+    #[derive(Debug, PartialEq)]
+    pub struct Ident {
+        pub name: String,
+    }
+
+    impl Ident {
+        pub fn new(name: &str) -> Ident {
+            Ident {
+                name: name.to_string(),
+            }
+        }
+    }
+
     impl fmt::Display for OperatorKind {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            match *self {
-                OperatorKind::Ident(c) => write!(f, "{}", c),
+            match self {
+                OperatorKind::Ident(c) => write!(f, "{}", c.name),
                 OperatorKind::Semi => write!(f, ";"),
                 OperatorKind::Operand(n) => write!(f, "{}", n),
                 OperatorKind::Equal => write!(f, "="),

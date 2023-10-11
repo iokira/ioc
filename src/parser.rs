@@ -4,12 +4,12 @@ pub mod parser {
     use crate::tree::tree::*;
 
     // プログラム
-    pub fn program(lexer: &mut Lexer) -> Vec<Tree> {
+    pub fn program(lexer: &mut Lexer) -> (Vec<Tree>, &mut Lexer) {
         let mut trees = Vec::new();
         while !lexer.expect(Token::EOF) {
             trees.push(stmt(lexer));
         }
-        trees
+        (trees, lexer)
     }
 
     // 命令
@@ -41,10 +41,16 @@ pub mod parser {
         while lexer.expect(Token::Operator(OperatorKind::Equality))
             || lexer.expect(Token::Operator(OperatorKind::Nonequality))
         {
-            if lexer.consume(Token::Operator(OperatorKind::Equality)).is_ok() {
+            if lexer
+                .consume(Token::Operator(OperatorKind::Equality))
+                .is_ok()
+            {
                 tree = Tree::new_tree(NodeKind::Equality, tree, relational(lexer));
             }
-            if lexer.consume(Token::Operator(OperatorKind::Nonequality)).is_ok() {
+            if lexer
+                .consume(Token::Operator(OperatorKind::Nonequality))
+                .is_ok()
+            {
                 tree = Tree::new_tree(NodeKind::Nonequality, tree, relational(lexer));
             }
         }
@@ -62,13 +68,22 @@ pub mod parser {
             if lexer.consume(Token::Operator(OperatorKind::Less)).is_ok() {
                 tree = Tree::new_tree(NodeKind::Less, tree, add(lexer));
             }
-            if lexer.consume(Token::Operator(OperatorKind::LessOrEqual)).is_ok() {
+            if lexer
+                .consume(Token::Operator(OperatorKind::LessOrEqual))
+                .is_ok()
+            {
                 tree = Tree::new_tree(NodeKind::LessOrEqual, tree, add(lexer));
             }
-            if lexer.consume(Token::Operator(OperatorKind::Greater)).is_ok() {
+            if lexer
+                .consume(Token::Operator(OperatorKind::Greater))
+                .is_ok()
+            {
                 tree = Tree::new_tree(NodeKind::Less, add(lexer), tree);
             }
-            if lexer.consume(Token::Operator(OperatorKind::GreaterOrEqual)).is_ok() {
+            if lexer
+                .consume(Token::Operator(OperatorKind::GreaterOrEqual))
+                .is_ok()
+            {
                 tree = Tree::new_tree(NodeKind::LessOrEqual, add(lexer), tree);
             }
         }
@@ -129,7 +144,7 @@ pub mod parser {
                 }
             }
             Ok(Token::Operator(OperatorKind::Operand(n))) => Tree::new_num(n),
-            Ok(Token::Operator(OperatorKind::Ident(c))) => Tree::new_val(c),
+            Ok(Token::Operator(OperatorKind::Ident(i))) => Tree::new_val(i, lexer),
             _ => panic!("expect number or block but disappear"),
         }
     }
@@ -142,8 +157,9 @@ mod test {
     #[test]
     fn test_parser() {
         let lexer1 = &mut Lexer::new("1+1;");
+        let (lexer1, _) = program(lexer1);
         assert_eq!(
-            program(lexer1),
+            lexer1,
             [Tree::Node(
                 NodeKind::Add,
                 Box::new(Tree::Num(1)),
@@ -152,8 +168,9 @@ mod test {
         );
 
         let lexer2 = &mut Lexer::new("1+1*2;");
+        let (lexer2, _) = program(lexer2);
         assert_eq!(
-            program(lexer2),
+            lexer2,
             [Tree::Node(
                 NodeKind::Add,
                 Box::new(Tree::Num(1)),
@@ -166,8 +183,9 @@ mod test {
         );
 
         let lexer3 = &mut Lexer::new("3 * (2 + 3) - (6 / 2 + 2);");
+        let (lexer3, _) = program(lexer3);
         assert_eq!(
-            program(lexer3),
+            lexer3,
             [Tree::Node(
                 NodeKind::Sub,
                 Box::new(Tree::Node(
@@ -192,8 +210,9 @@ mod test {
         );
 
         let lexer4 = &mut Lexer::new("5 + 6 * 7;");
+        let (lexer4, _) = program(lexer4);
         assert_eq!(
-            program(lexer4),
+            lexer4,
             [Tree::Node(
                 NodeKind::Add,
                 Box::new(Tree::Num(5)),
@@ -206,8 +225,9 @@ mod test {
         );
 
         let lexer5 = &mut Lexer::new("2 * 3 == 3 + 1;");
+        let (lexer5, _) = program(lexer5);
         assert_eq!(
-            program(lexer5),
+            lexer5,
             [Tree::Node(
                 NodeKind::Equality,
                 Box::new(Tree::Node(
@@ -223,6 +243,7 @@ mod test {
             )]
         );
         let lexer6 = &mut Lexer::new("a;");
-        assert_eq!(program(lexer6), [Tree::Val(8)]);
+        let (lexer6, _) = program(lexer6);
+        assert_eq!(lexer6, [Tree::Val(8)]);
     }
 }

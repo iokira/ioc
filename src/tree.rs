@@ -1,5 +1,5 @@
 pub mod tree {
-    use crate::numtype::numtype::NumType;
+    use crate::{lexer::lexer::Lexer, numtype::numtype::NumType, token::token::Ident};
 
     #[derive(Debug, PartialEq)]
     pub enum NodeKind {
@@ -18,7 +18,7 @@ pub mod tree {
     #[derive(Debug, PartialEq)]
     pub enum Tree {
         Num(NumType),
-        Val(NumType),
+        Val(usize),
         Node(NodeKind, Box<Tree>, Box<Tree>),
     }
 
@@ -31,8 +31,8 @@ pub mod tree {
             Tree::Num(num)
         }
 
-        pub fn new_val(c: char) -> Tree {
-            Tree::Val((c as NumType - 'a' as NumType + 1) * 8)
+        pub fn new_val(i: Ident, lexer: &mut Lexer) -> Tree {
+            Tree::Val(lexer.calc_offset(i))
         }
     }
 }
