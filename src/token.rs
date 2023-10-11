@@ -1,6 +1,8 @@
 pub mod token {
     use core::fmt;
 
+    use crate::numtype::numtype::NumType;
+
     #[derive(Debug, PartialEq)]
     pub enum Token {
         Operator(OperatorKind),
@@ -16,7 +18,7 @@ pub mod token {
     pub enum OperatorKind {
         Ident(char),
         Semi,
-        Operand(usize),
+        Operand(NumType),
         Equal,
         Equality,
         Nonequality,

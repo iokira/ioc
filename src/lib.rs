@@ -1,6 +1,7 @@
 pub mod generator;
 pub mod lexer;
 pub mod myerror;
+pub mod numtype;
 pub mod parser;
 pub mod token;
 pub mod tree;

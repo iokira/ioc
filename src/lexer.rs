@@ -1,9 +1,9 @@
 pub mod lexer {
-    use crate::token::token::*;
+    use crate::{numtype::numtype::NumType, token::token::*};
 
     pub struct Lexer {
         input: Vec<char>,
-        position: usize,
+        position: NumType,
     }
 
     impl Lexer {
@@ -31,7 +31,7 @@ pub mod lexer {
                 }
                 let s: String = number.iter().collect();
                 Ok(Token::Operator(OperatorKind::Operand(
-                    s.parse::<usize>().unwrap(),
+                    s.parse::<NumType>().unwrap(),
                 )))
             } else {
                 // 演算子を変換
@@ -162,7 +162,7 @@ pub mod lexer {
         }
 
         // 入力n分だけ読み進める
-        fn proceed_char(&mut self, n: usize) {
+        fn proceed_char(&mut self, n: NumType) {
             self.position += n;
         }
 
@@ -176,7 +176,7 @@ pub mod lexer {
         }
 
         // 入力n分だけ先の文字を取得
-        fn peek_char(&mut self, n: usize) -> char {
+        fn peek_char(&mut self, n: NumType) -> char {
             match self.input.get(self.position + n) {
                 Some(c) => *c,
                 None => '\0',

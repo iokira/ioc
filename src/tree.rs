@@ -1,4 +1,6 @@
 pub mod tree {
+    use crate::numtype::numtype::NumType;
+
     #[derive(Debug, PartialEq)]
     pub enum NodeKind {
         Assign,      // =
@@ -15,8 +17,8 @@ pub mod tree {
 
     #[derive(Debug, PartialEq)]
     pub enum Tree {
-        Num(usize),
-        Val(usize),
+        Num(NumType),
+        Val(NumType),
         Node(NodeKind, Box<Tree>, Box<Tree>),
     }
 
@@ -25,12 +27,12 @@ pub mod tree {
             Tree::Node(kind, Box::new(lhs), Box::new(rhs))
         }
 
-        pub fn new_num(num: usize) -> Tree {
+        pub fn new_num(num: NumType) -> Tree {
             Tree::Num(num)
         }
 
         pub fn new_val(c: char) -> Tree {
-            Tree::Val((c as usize - 'a' as usize + 1) * 8)
+            Tree::Val((c as NumType - 'a' as NumType + 1) * 8)
         }
     }
 }
