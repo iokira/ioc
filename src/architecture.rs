@@ -103,7 +103,7 @@ pub mod myarchitecture {
     }
 
     #[cfg(target_arch = "x86_64")]
-    fn add(rd: &str, rn: &str, src2: &str) -> String {
+    fn add(rd: &str, rn: &str, _src2: &str) -> String {
         format!("\tadd {}, {}\n", rd, rn) // rd <- rd + rn
     }
 
@@ -113,7 +113,7 @@ pub mod myarchitecture {
     }
 
     #[cfg(target_arch = "x86_64")]
-    pub fn sub(rd: &str, rn: &str, src2: &str) -> String {
+    pub fn sub(rd: &str, rn: &str, _src2: &str) -> String {
         format!("\tsub {}, {}\n", rd, rn) // rd <- rd - rn
     }
 
@@ -123,7 +123,7 @@ pub mod myarchitecture {
     }
 
     #[cfg(target_arch = "x86_64")]
-    pub fn mul(rd: &str, rn: &str, rm: &str) -> String {
+    pub fn mul(rd: &str, rn: &str, _rm: &str) -> String {
         format!("\timul {}, {}\n", rd, rn) // rd <- rd x rn
     }
 
@@ -133,7 +133,7 @@ pub mod myarchitecture {
     }
 
     #[cfg(target_arch = "x86_64")]
-    pub fn div(rd: &str, rn: &str, rm: &str) -> String {
+    pub fn div(rd: &str, _rn: &str, _rm: &str) -> String {
         format!("\tcqo\n\tidiv {}", rd)
     }
 
