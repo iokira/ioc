@@ -123,7 +123,7 @@ fn construct_assembly(contents: &str) -> Result<String, MyError> {
     // 変数26個分の領域を確保
     assembly.push_str("\tpush rbp\n");
     assembly.push_str("\tmov rbp, rsp\n");
-    assembly.push_str(&format!("\tsub rsp, {}\n", ident_count));
+    assembly.push_str(&format!("\tsub rsp, {}\n", ident_count * 8));
 
     // 構文木をアセンブリに変換
     for tree in trees {
