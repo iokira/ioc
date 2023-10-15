@@ -281,44 +281,72 @@ pub mod myarchitecture {
         unimplemented!()
     }
 
+    pub fn add_arg() -> String {
+        add(
+            Operand::Register(Register::R0),
+            Operand::Register(Register::R1),
+        )
+    }
+
     #[cfg(target_arch = "x86_64")]
-    pub fn add(rd: Operand, rn: Operand) -> String {
+    fn add(rd: Operand, rn: Operand) -> String {
         format!("\tadd {}, {}\n", rd, rn) // rd <- rd + rn
     }
 
     #[cfg(target_arch = "aarch64")]
-    pub fn add(rd: Operand, rn: Operand, src2: Operand) -> String {
-        format!("\tadd {}, {}, {}\n", rd, rn, src2) // rd <- rn + src2
+    fn add(rd: Operand, rn: Operand) -> String {
+        format!("\tadd {}, {}, {}\n", rd, rd, rn) // rd <- rn + src2
+    }
+
+    pub fn sub_arg() -> String {
+        sub(
+            Operand::Register(Register::R0),
+            Operand::Register(Register::R1),
+        )
     }
 
     #[cfg(target_arch = "x86_64")]
-    pub fn sub(rd: Operand, rn: Operand) -> String {
+    fn sub(rd: Operand, rn: Operand) -> String {
         format!("\tsub {}, {}\n", rd, rn) // rd <- rd - rn
     }
 
     #[cfg(target_arch = "aarch64")]
-    pub fn sub(rd: Operand, rn: Operand, src2: Operand) -> String {
-        format!("\tsub {}, {}, {}\n", rd, rn, src2) // rd <- rn - src2
+    fn sub(rd: Operand, rn: Operand) -> String {
+        format!("\tsub {}, {}, {}\n", rd, rd, rn) // rd <- rn - src2
+    }
+
+    pub fn mul_arg() -> String {
+        mul(
+            Operand::Register(Register::R0),
+            Operand::Register(Register::R1),
+        )
     }
 
     #[cfg(target_arch = "x86_64")]
-    pub fn mul(rd: Operand, rn: Operand) -> String {
+    fn mul(rd: Operand, rn: Operand) -> String {
         format!("\timul {}, {}\n", rd, rn) // rd <- rd x rn
     }
 
     #[cfg(target_arch = "aarch64")]
-    pub fn mul(rd: Operand, rn: Operand, rm: Operand) -> String {
-        format!("\tmul {}, {}, {}\n", rd, rn, rm) // rd <- rn x rm
+    fn mul(rd: Operand, rn: Operand) -> String {
+        format!("\tmul {}, {}, {}\n", rd, rd, rn) // rd <- rn x rm
+    }
+
+    pub fn div_arg() -> String {
+        div(
+            Operand::Register(Register::R0),
+            Operand::Register(Register::R1),
+        )
     }
 
     #[cfg(target_arch = "x86_64")]
-    pub fn div(rd: Operand, _rn: Operand) -> String {
-        format!("\tcqo\n\tidiv {}\n", rd)
+    fn div(_: Operand, rn: Operand) -> String {
+        format!("\tcqo\n\tidiv {}\n", rn)
     }
 
     #[cfg(target_arch = "aarch64")]
-    pub fn div(rd: Operand, rn: Operand, rm: Operand) -> String {
-        format!("\tudiv {}, {}, {}\n", rd, rn, rm)
+    fn div(rd: Operand, rn: Operand) -> String {
+        format!("\tudiv {}, {}, {}\n", rd, rd, rn)
     }
 
     #[cfg(target_arch = "x86_64")]

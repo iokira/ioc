@@ -47,10 +47,10 @@ pub mod mygenerator {
                 NodeKind::LessOrEqual => {
                     assembly.push_str("\tcmp rax, rdi\n\tsetle al\n\tmovzb rax, al\n")
                 }
-                NodeKind::Add => assembly.push_str("\tadd rax, rdi\n"),
-                NodeKind::Sub => assembly.push_str("\tsub rax, rdi\n"),
-                NodeKind::Mul => assembly.push_str("\timul rax, rdi\n"),
-                NodeKind::Div => assembly.push_str("\tcqo\n\tidiv rdi\n"),
+                NodeKind::Add => assembly.push_str(&add_arg()),
+                NodeKind::Sub => assembly.push_str(&sub_arg()),
+                NodeKind::Mul => assembly.push_str(&mul_arg()),
+                NodeKind::Div => assembly.push_str(&div_arg()),
                 NodeKind::Assign => unimplemented!(),
                 NodeKind::VAL => unimplemented!(),
             }
