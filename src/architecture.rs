@@ -139,11 +139,7 @@ pub mod myarchitecture {
                 Operand::Register(Register::R15),
                 Operand::Register(Register::R13)
             ),
-            sub(
-                Operand::Register(Register::R13),
-                Operand::Register(Register::R13),
-                Operand::Num(bytes)
-            )
+            sub(Operand::Register(Register::R13), Operand::Num(bytes))
         )
     }
 
@@ -204,11 +200,7 @@ pub mod myarchitecture {
                 Operand::Register(Register::R0),
                 Operand::Register(Register::R15)
             ),
-            sub(
-                Operand::Register(Register::R0),
-                Operand::Register(Register::R0),
-                Operand::Num(offset)
-            ),
+            sub(Operand::Register(Register::R0), Operand::Num(offset)),
             push(Operand::Register(Register::R0))
         )
     }
