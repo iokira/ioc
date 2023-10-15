@@ -83,6 +83,16 @@ pub mod myarchitecture {
     }
 
     #[cfg(target_arch = "x86_64")]
+    pub fn memory_allocate(bytes: usize) -> String {
+        format!("\tpush rbp\n\tmov rbp, rsp\n\tsub rsp, {}\n", bytes)
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    pub fn memory_allocate(bytes: usize) -> String {
+        format!("\tpush pc\n\tmov pc, sp\n\tsub sp, {}\n", bytes)
+    }
+
+    #[cfg(target_arch = "x86_64")]
     fn push(rd: &str) -> String {
         format!("\tpush {}\n", rd)
     }
