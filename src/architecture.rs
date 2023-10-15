@@ -6,22 +6,37 @@ pub mod myarchitecture {
     pub enum Register {
         /// rax, w0
         R0,
-        // rdi, w0
+        // rdi, w1
         R1,
+        /// rsi, w2
         R2,
+        /// rdx, w3
         R3,
+        /// rcx, w4
         R4,
+        /// rbp, w5
         R5,
+        /// rsp, w6
         R6,
+        /// rbx, w7
         R7,
+        /// r8, w8
         R8,
+        /// r9, w9
         R9,
+        /// r10, w10
         R10,
+        /// r11, w11
         R11,
+        /// r12, w12
         R12,
+        /// r13, sp
         R13,
+        /// r14, lr
         R14,
+        /// r15, pc
         R15,
+        /// Immidiate operand
         Num(NumType),
     }
 
@@ -53,19 +68,19 @@ pub mod myarchitecture {
         #[cfg(target_arch = "aarch64")]
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             let name: String = match self {
-                Register::R0 => "r0".to_string(),
-                Register::R1 => "r1".to_string(),
-                Register::R2 => "r2".to_string(),
-                Register::R3 => "r3".to_string(),
-                Register::R4 => "r4".to_string(),
-                Register::R5 => "r5".to_string(),
-                Register::R6 => "r6".to_string(),
-                Register::R7 => "r7".to_string(),
-                Register::R8 => "r8".to_string(),
-                Register::R9 => "r9".to_string(),
-                Register::R10 => "r10".to_string(),
-                Register::R11 => "r11".to_string(),
-                Register::R12 => "r12".to_string(),
+                Register::R0 => "w0".to_string(),
+                Register::R1 => "w1".to_string(),
+                Register::R2 => "w2".to_string(),
+                Register::R3 => "w3".to_string(),
+                Register::R4 => "w4".to_string(),
+                Register::R5 => "w5".to_string(),
+                Register::R6 => "w6".to_string(),
+                Register::R7 => "w7".to_string(),
+                Register::R8 => "w8".to_string(),
+                Register::R9 => "w9".to_string(),
+                Register::R10 => "w10".to_string(),
+                Register::R11 => "w11".to_string(),
+                Register::R12 => "w12".to_string(),
                 Register::R13 => "sp".to_string(),
                 Register::R14 => "lr".to_string(),
                 Register::R15 => "pc".to_string(),
