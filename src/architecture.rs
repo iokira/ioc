@@ -120,7 +120,7 @@ pub mod myarchitecture {
             "{}{}{}",
             push(Register::R15),
             mov(Register::R15, Register::R13),
-            sub(Register::R13, Register::Num(bytes))
+            sub(Register::R13, Register::R13, Register::Num(bytes))
         )
     }
 
