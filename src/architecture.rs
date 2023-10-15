@@ -1,8 +1,12 @@
 pub mod myarchitecture {
     use core::fmt;
 
+    use crate::numtype::mynumtype::NumType;
+
     pub enum Register {
+        /// rax, w0
         R0,
+        // rdi, w0
         R1,
         R2,
         R3,
@@ -18,51 +22,54 @@ pub mod myarchitecture {
         R13,
         R14,
         R15,
+        Num(NumType),
     }
 
     impl fmt::Display for Register {
         #[cfg(target_arch = "x86_64")]
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            let name = match self {
-                Register::R0 => "r0",
-                Register::R1 => "r1",
-                Register::R2 => "r2",
-                Register::R3 => "r3",
-                Register::R4 => "r4",
-                Register::R5 => "r5",
-                Register::R6 => "r6",
-                Register::R7 => "r7",
-                Register::R8 => "r8",
-                Register::R9 => "r9",
-                Register::R10 => "r10",
-                Register::R11 => "r11",
-                Register::R12 => "r12",
-                Register::R13 => "sp",
-                Register::R14 => "lr",
-                Register::R15 => "pc",
+            let name: String = match self {
+                Register::R0 => "rax".to_string(),
+                Register::R1 => "rdi".to_string(),
+                Register::R2 => "rsi".to_string(),
+                Register::R3 => "rdx".to_string(),
+                Register::R4 => "rcx".to_string(),
+                Register::R5 => "rbp".to_string(),
+                Register::R6 => "rsp".to_string(),
+                Register::R7 => "rbx".to_string(),
+                Register::R8 => "r8".to_string(),
+                Register::R9 => "r9".to_string(),
+                Register::R10 => "r10".to_string(),
+                Register::R11 => "r11".to_string(),
+                Register::R12 => "r12".to_string(),
+                Register::R13 => "r13".to_string(),
+                Register::R14 => "r14".to_string(),
+                Register::R15 => "r15".to_string(),
+                Register::Num(n) => n.to_string(),
             };
             write!(f, "{}", name)
         }
 
         #[cfg(target_arch = "aarch64")]
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            let name = match self {
-                Register::R0 => "rax",
-                Register::R1 => "rdi",
-                Register::R2 => "rsi",
-                Register::R3 => "rdx",
-                Register::R4 => "rcx",
-                Register::R5 => "rbp",
-                Register::R6 => "rsp",
-                Register::R7 => "rbx",
-                Register::R8 => "r8",
-                Register::R9 => "r9",
-                Register::R10 => "r10",
-                Register::R11 => "r11",
-                Register::R12 => "r12",
-                Register::R13 => "r13",
-                Register::R14 => "r14",
-                Register::R15 => "r15",
+            let name: String = match self {
+                Register::R0 => "r0".to_string(),
+                Register::R1 => "r1".to_string(),
+                Register::R2 => "r2".to_string(),
+                Register::R3 => "r3".to_string(),
+                Register::R4 => "r4".to_string(),
+                Register::R5 => "r5".to_string(),
+                Register::R6 => "r6".to_string(),
+                Register::R7 => "r7".to_string(),
+                Register::R8 => "r8".to_string(),
+                Register::R9 => "r9".to_string(),
+                Register::R10 => "r10".to_string(),
+                Register::R11 => "r11".to_string(),
+                Register::R12 => "r12".to_string(),
+                Register::R13 => "sp".to_string(),
+                Register::R14 => "lr".to_string(),
+                Register::R15 => "pc".to_string(),
+                Register::Num(n) => n.to_string(),
             };
             write!(f, "{}", name)
         }
@@ -84,85 +91,125 @@ pub mod myarchitecture {
 
     #[cfg(target_arch = "x86_64")]
     pub fn memory_allocate(bytes: usize) -> String {
-        format!("\tpush rbp\n\tmov rbp, rsp\n\tsub rsp, {}\n", bytes)
+        format!(
+            "{}{}{}",
+            push(Register::R5),
+            mov(Register::R5, Register::R6),
+            sub(Register::R6, Register::Num(bytes))
+        )
     }
 
     #[cfg(target_arch = "aarch64")]
     pub fn memory_allocate(bytes: usize) -> String {
-        format!("\tpush pc\n\tmov pc, sp\n\tsub sp, {}\n", bytes)
+        format!(
+            "{}{}{}",
+            push(Register::R15),
+            mov(Register::R15, Register::R13),
+            sub(Register::R13, Register::Num(bytes))
+        )
     }
 
     #[cfg(target_arch = "x86_64")]
-    fn push(rd: &str) -> String {
+    pub fn stmt_epilogue() -> String {
+        pop(Register::R0)
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    pub fn stmt_epilogue() -> String {
+        pop(Register::R0)
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    pub fn program_epilogue() -> String {
+        format!(
+            "{}{}{}",
+            mov(Register::R6, Register::R5),
+            pop(Register::R5),
+            ret()
+        )
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    pub fn program_epilogue() -> String {
+        format!(
+            "{}{}{}",
+            mov(Register::R13, Register::R15),
+            pop(Register::R15),
+            ret()
+        )
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    pub fn push(rd: Register) -> String {
         format!("\tpush {}\n", rd)
     }
 
     #[cfg(target_arch = "aarch64")]
-    fn push() -> String {
+    fn push(rd: Register) -> String {
         unimplemented!()
     }
 
     #[cfg(target_arch = "x86_64")]
-    fn pop(rd: &str) -> String {
+    fn pop(rd: Register) -> String {
         format!("\tpop {}\n", rd)
     }
 
     #[cfg(target_arch = "aarch64")]
-    fn pop() -> String {
+    fn pop(rd: Register) -> String {
         unimplemented!()
     }
 
     #[cfg(target_arch = "x86_64")]
-    fn add(rd: &str, rn: &str, _src2: &str) -> String {
+    fn add(rd: Register, rn: Register) -> String {
         format!("\tadd {}, {}\n", rd, rn) // rd <- rd + rn
     }
 
     #[cfg(target_arch = "aarch64")]
-    pub fn add(rd: &str, rn: &str, src2: &str) -> String {
+    pub fn add(rd: Register, rn: Register, src2: Register) -> String {
         format!("\tadd {}, {}, {}\n", rd, rn, src2) // rd <- rn + src2
     }
 
     #[cfg(target_arch = "x86_64")]
-    pub fn sub(rd: &str, rn: &str, _src2: &str) -> String {
+    pub fn sub(rd: Register, rn: Register) -> String {
         format!("\tsub {}, {}\n", rd, rn) // rd <- rd - rn
     }
 
     #[cfg(target_arch = "aarch64")]
-    pub fn sub(rd: &str, rn: &str, src2: &str) -> String {
+    pub fn sub(rd: Register, rn: Register, src2: Register) -> String {
         format!("\tsub {}, {}, {}\n", rd, rn, src2) // rd <- rn - src2
     }
 
     #[cfg(target_arch = "x86_64")]
-    pub fn mul(rd: &str, rn: &str, _rm: &str) -> String {
+    pub fn mul(rd: Register, rn: Register) -> String {
         format!("\timul {}, {}\n", rd, rn) // rd <- rd x rn
     }
 
     #[cfg(target_arch = "aarch64")]
-    pub fn mul(rd: &str, rn: &str, rm: &str) -> String {
+    pub fn mul(rd: Register, rn: Register, rm: Register) -> String {
         format!("\tmul {}, {}, {}\n", rd, rn, rm) // rd <- rn x rm
     }
 
     #[cfg(target_arch = "x86_64")]
-    pub fn div(rd: &str, _rn: &str, _rm: &str) -> String {
-        format!("\tcqo\n\tidiv {}", rd)
+    pub fn div(rd: Register, _rn: Register) -> String {
+        format!("\tcqo\n\tidiv {}\n", rd)
     }
 
     #[cfg(target_arch = "aarch64")]
-    pub fn div(rd: &str, rn: &str, rm: &str) -> String {
-        format!("\tudiv {}, {}, {}", rd, rn, rm)
+    pub fn div(rd: Register, rn: Register, rm: Register) -> String {
+        format!("\tudiv {}, {}, {}\n", rd, rn, rm)
     }
 
     #[cfg(target_arch = "x86_64")]
-    pub fn mov(rd: &str, src2: &str) -> String {
-        format!("\tmov {}, {}", rd, src2)
+    pub fn mov(rd: Register, src2: Register) -> String {
+        format!("\tmov {}, {}\n", rd, src2)
     }
 
     #[cfg(target_arch = "aarch64")]
-    pub fn mov(rd: &str, src2: &str) -> String {
-        format!("\tmov {}, {}", rd, src2)
+    pub fn mov(rd: Register, src2: Register) -> String {
+        format!("\tmov {}, {}\n", rd, src2)
     }
 
-    pub fn ret() -> String {
+    fn ret() -> String {
         "\tret\n".to_string()
     }
 }

@@ -131,12 +131,10 @@ fn construct_assembly(contents: &str) -> Result<String, MyError> {
     // 構文木をアセンブリに変換
     for tree in trees {
         generate_assembly(&mut assembly, tree);
-        assembly.push_str("\tpop rax\n");
+        assembly.push_str(&stmt_epilogue());
     }
 
     // 最後の式の結果がraxに残り、返される
-    assembly.push_str("\tmov rsp, rbp\n");
-    assembly.push_str("\tpop rbp\n");
-    assembly.push_str(&ret());
+    assembly.push_str(&program_epilogue());
     Ok(assembly)
 }
