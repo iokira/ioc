@@ -1,6 +1,6 @@
 pub mod mygenerator {
     use crate::{
-        architecture::myarchitecture::{gen_val, pop_lvar, pop_val, push, Operand},
+        architecture::myarchitecture::{gen_val, pop_arg, pop_lvar, pop_val, push, Operand},
         tree::mytree::*,
     };
 
@@ -37,8 +37,7 @@ pub mod mygenerator {
             generate_assembly(assembly, *lhs);
             generate_assembly(assembly, *rhs);
 
-            assembly.push_str("\tpop rdi\n");
-            assembly.push_str("\tpop rax\n");
+            assembly.push_str(&pop_arg());
 
             match kind {
                 NodeKind::Equality => {

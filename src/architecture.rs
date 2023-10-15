@@ -253,6 +253,14 @@ pub mod myarchitecture {
         )
     }
 
+    pub fn pop_arg() -> String {
+        format!(
+            "{}{}",
+            pop(Operand::Register(Register::R1)),
+            pop(Operand::Register(Register::R0))
+        )
+    }
+
     #[cfg(target_arch = "x86_64")]
     pub fn push(rd: Operand) -> String {
         format!("\tpush {}\n", rd)
