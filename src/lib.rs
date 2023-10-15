@@ -117,10 +117,8 @@ fn construct_assembly(contents: &str) -> Result<String, MyError> {
     let (trees, lexer) = program(lexer);
     let ident_count = lexer.get_ident_count();
 
-    // intel syntaxの宣言
-    if cfg!(target_arch = "x86_64") {
-        assembly.push_str(&intel_syntax());
-    }
+    // prologue
+    assembly.push_str(&program_prologue());
 
     // main関数
     assembly.push_str(&main_func());

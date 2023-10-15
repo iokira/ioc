@@ -114,8 +114,14 @@ pub mod myarchitecture {
         }
     }
 
-    pub fn intel_syntax() -> String {
+    #[cfg(target_arch = "x86_64")]
+    pub fn program_prologue() -> String {
         ".intel_syntax noprefix\n".to_string()
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    pub fn program_prologue() -> String {
+        ".text\n".to_string()
     }
 
     #[cfg(target_arch = "x86_64")]
