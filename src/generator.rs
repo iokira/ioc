@@ -1,5 +1,8 @@
 pub mod mygenerator {
-    use crate::tree::mytree::*;
+    use crate::{
+        architecture::myarchitecture::{push, Operand},
+        tree::mytree::*,
+    };
 
     fn generate_val(assembly: &mut String, offset: usize) {
         let str = format!("\tmov rax, rbp\n\tsub rax, {}\n\tpush rax\n", offset);
@@ -9,7 +12,7 @@ pub mod mygenerator {
     // 構文木をアセンブリに変換する
     pub fn generate_assembly(assembly: &mut String, tree: Tree) {
         if let Tree::Num(n) = tree {
-            let str = format!("\tpush {}\n", n);
+            let str = &push(Operand::Num(n));
             assembly.push_str(&str);
             return;
         }
