@@ -260,7 +260,7 @@ pub mod myarchitecture {
 
     #[cfg(target_arch = "aarch64")]
     pub fn push(rd: Operand) -> String {
-        unimplemented!()
+        format!("\tpush {}\n", rd)
     }
 
     #[cfg(target_arch = "x86_64")]
@@ -270,7 +270,7 @@ pub mod myarchitecture {
 
     #[cfg(target_arch = "aarch64")]
     fn pop(rd: Operand) -> String {
-        unimplemented!()
+        format!("\tpop {}\n", rd)
     }
 
     pub fn add_arg() -> String {

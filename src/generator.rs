@@ -45,8 +45,7 @@ pub mod mygenerator {
                 NodeKind::Sub => assembly.push_str(&sub_arg()),
                 NodeKind::Mul => assembly.push_str(&mul_arg()),
                 NodeKind::Div => assembly.push_str(&div_arg()),
-                NodeKind::Assign => unimplemented!(),
-                NodeKind::VAL => unimplemented!(),
+                _ => panic!("unexpected node"),
             }
             assembly.push_str(&push(Operand::Register(Register::R0)));
         }
