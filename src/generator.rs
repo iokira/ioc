@@ -1,8 +1,5 @@
 pub mod mygenerator {
-    use crate::{
-        architecture::myarchitecture::{gen_val, pop_arg, pop_lvar, pop_val, push, Operand},
-        tree::mytree::*,
-    };
+    use crate::{architecture::myarchitecture::*, tree::mytree::*};
 
     fn generate_val(assembly: &mut String, offset: usize) {
         assembly.push_str(&gen_val(offset));
@@ -57,7 +54,7 @@ pub mod mygenerator {
                 NodeKind::Assign => unimplemented!(),
                 NodeKind::VAL => unimplemented!(),
             }
-            assembly.push_str("\tpush rax\n");
+            assembly.push_str(&push(Operand::Register(Register::R0)));
         }
     }
 }
