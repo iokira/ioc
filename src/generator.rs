@@ -37,16 +37,10 @@ pub mod mygenerator {
             assembly.push_str(&pop_arg());
 
             match kind {
-                NodeKind::Equality => {
-                    assembly.push_str("\tcmp rax, rdi\n\tsete al\n\tmovzb rax, al\n")
-                }
-                NodeKind::Nonequality => {
-                    assembly.push_str("\tcmp rax, rdi\n\tsetne al\n\tmovzb rax, al\n")
-                }
-                NodeKind::Less => assembly.push_str("\tcmp rax, rdi\n\tsetl al\n\tmovzb rax, al\n"),
-                NodeKind::LessOrEqual => {
-                    assembly.push_str("\tcmp rax, rdi\n\tsetle al\n\tmovzb rax, al\n")
-                }
+                NodeKind::Equality => assembly.push_str(&eq_arg()),
+                NodeKind::Nonequality => assembly.push_str(&neq_arg()),
+                NodeKind::Less => assembly.push_str(&less_arg()),
+                NodeKind::LessOrEqual => assembly.push_str(&less_or_eq_arg()),
                 NodeKind::Add => assembly.push_str(&add_arg()),
                 NodeKind::Sub => assembly.push_str(&sub_arg()),
                 NodeKind::Mul => assembly.push_str(&mul_arg()),

@@ -342,13 +342,93 @@ pub mod myarchitecture {
     }
 
     #[cfg(target_arch = "x86_64")]
-    pub fn mov(rd: Operand, src2: Operand) -> String {
+    fn mov(rd: Operand, src2: Operand) -> String {
         format!("\tmov {}, {}\n", rd, src2)
     }
 
     #[cfg(target_arch = "aarch64")]
-    pub fn mov(rd: Operand, src2: Operand) -> String {
+    fn mov(rd: Operand, src2: Operand) -> String {
         format!("\tmov {}, {}\n", rd, src2)
+    }
+
+    pub fn eq_arg() -> String {
+        eq(
+            Operand::Register(Register::R0),
+            Operand::Register(Register::R1),
+        )
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    fn eq(rd: Operand, rn: Operand) -> String {
+        format!("\tcmp {}, {}\n\tsete al\n\tmovzb {}, al\n", rd, rn, rd)
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    fn eq(rd: Operand, rn: Operand) -> String {
+        format!(
+            "\tcmp {}, {}\n\tmov {}, #0\n\tmoveq {}, #1\n",
+            rd, rn, rd, rd
+        )
+    }
+
+    pub fn neq_arg() -> String {
+        neq(
+            Operand::Register(Register::R0),
+            Operand::Register(Register::R1),
+        )
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    fn neq(rd: Operand, rn: Operand) -> String {
+        format!("\tcmp {}, {}\n\tsetne al\n\tmovzb {}, al\n", rd, rn, rd)
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    fn neq(rd: Operand, rn: Operand) -> String {
+        format!(
+            "\tcmp {}, {}\n\tmov {}, #1\n\tmoveq {}, #0\n",
+            rd, rn, rd, rd
+        )
+    }
+
+    pub fn less_arg() -> String {
+        less(
+            Operand::Register(Register::R0),
+            Operand::Register(Register::R1),
+        )
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    fn less(rd: Operand, rn: Operand) -> String {
+        format!("\tcmp {}, {}\n\tsetl al\n\tmovzb {}, al\n", rd, rn, rd)
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    fn less(rd: Operand, rn: Operand) -> String {
+        format!(
+            "\tcmp {}, {}\n\tmov {}, #0\n\tmovlt {}, #1\n",
+            rd, rn, rd, rd
+        )
+    }
+
+    pub fn less_or_eq_arg() -> String {
+        less_or_eq(
+            Operand::Register(Register::R0),
+            Operand::Register(Register::R1),
+        )
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    fn less_or_eq(rd: Operand, rn: Operand) -> String {
+        format!("\tcmp {}, {}\n\tsetle al\n\tmovzb {}, al\n", rd, rn, rd)
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    fn less_or_eq(rd: Operand, rn: Operand) -> String {
+        format!(
+            "\tcmp {}, {}\n\tmov {}, #0\n\tmovle {}, #1\n",
+            rd, rn, rd, rd
+        )
     }
 
     fn ret() -> String {
