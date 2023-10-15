@@ -1,6 +1,6 @@
 pub mod mygenerator {
     use crate::{
-        architecture::myarchitecture::{push, Operand},
+        architecture::myarchitecture::{pop_val, push, Operand},
         tree::mytree::*,
     };
 
@@ -19,8 +19,7 @@ pub mod mygenerator {
 
         if let Tree::Val(o) = tree {
             generate_val(assembly, o);
-            let str = "\tpop rax\n\tmov rax, [rax]\n\tpush rax\n".to_string();
-            assembly.push_str(&str);
+            assembly.push_str(&pop_val());
             return;
         }
 
