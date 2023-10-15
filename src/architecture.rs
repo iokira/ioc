@@ -6,7 +6,7 @@ pub mod myarchitecture {
     pub enum Register {
         /// rax, w0
         R0,
-        // rdi, w1
+        /// rdi, w1
         R1,
         /// rsi, w2
         R2,
@@ -183,6 +183,32 @@ pub mod myarchitecture {
         )
     }
 
+    #[cfg(target_arch = "x86_64")]
+    pub fn gen_val(offset: usize) -> String {
+        format!(
+            "{}{}{}",
+            mov(
+                Operand::Register(Register::R0),
+                Operand::Register(Register::R5)
+            ),
+            sub(Operand::Register(Register::R0), Operand::Num(offset)),
+            push(Operand::Register(Register::R0))
+        )
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    pub fn gen_val(offset: usize) -> String {
+        format!(
+            "{}{}{}",
+            mov(
+                Operand::Register(Register::R0),
+                Operand::Register(Register::R15)
+            ),
+            sub(Operand::Register(Register::R0), Operand::Num(offset)),
+            push(Operand::Register(Register::R0))
+        )
+    }
+
     pub fn pop_val() -> String {
         format!(
             "{}{}{}",
@@ -192,6 +218,34 @@ pub mod myarchitecture {
                 Operand::Address(Register::R0)
             ),
             push(Operand::Register(Register::R0))
+        )
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    pub fn pop_lvar() -> String {
+        format!(
+            "{}{}{}{}",
+            pop(Operand::Register(Register::R1)),
+            pop(Operand::Register(Register::R0)),
+            mov(
+                Operand::Address(Register::R0),
+                Operand::Register(Register::R1)
+            ),
+            push(Operand::Register(Register::R1))
+        )
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    pub fn pop_lvar() -> String {
+        format!(
+            "{}{}{}{}",
+            pop(Operand::Register(Register::R1)),
+            pop(Operand::Register(Register::R0)),
+            mov(
+                Operand::Address(Register::R0),
+                Operand::Register(Register::R1)
+            ),
+            push(Operand::Register(Register::R1))
         )
     }
 

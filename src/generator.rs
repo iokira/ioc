@@ -1,12 +1,11 @@
 pub mod mygenerator {
     use crate::{
-        architecture::myarchitecture::{pop_val, push, Operand},
+        architecture::myarchitecture::{gen_val, pop_lvar, pop_val, push, Operand},
         tree::mytree::*,
     };
 
     fn generate_val(assembly: &mut String, offset: usize) {
-        let str = format!("\tmov rax, rbp\n\tsub rax, {}\n\tpush rax\n", offset);
-        assembly.push_str(&str);
+        assembly.push_str(&gen_val(offset));
     }
 
     // 構文木をアセンブリに変換する
@@ -31,8 +30,7 @@ pub mod mygenerator {
                     panic!("The left-hand side value of the assignment is not a variable")
                 }
                 generate_assembly(assembly, *rhs);
-                let str = "\tpop rdi\n\tpop rax\n\tmov [rax], rdi\n\tpush rdi\n".to_string();
-                assembly.push_str(&str);
+                assembly.push_str(&pop_lvar());
                 return;
             }
 
