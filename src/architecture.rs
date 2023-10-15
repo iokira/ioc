@@ -4,31 +4,31 @@ pub mod myarchitecture {
     use crate::numtype::mynumtype::NumType;
 
     pub enum Register {
-        /// rax, w0
+        /// rax, x0
         R0,
-        /// rdi, w1
+        /// rdi, x1
         R1,
-        /// rsi, w2
+        /// rsi, x2
         R2,
-        /// rdx, w3
+        /// rdx, x3
         R3,
-        /// rcx, w4
+        /// rcx, x4
         R4,
-        /// rbp, w5
+        /// rbp, x5
         R5,
-        /// rsp, w6
+        /// rsp, x6
         R6,
-        /// rbx, w7
+        /// rbx, x7
         R7,
-        /// r8, w8
+        /// r8, x8
         R8,
-        /// r9, w9
+        /// r9, x9
         R9,
-        /// r10, w10
+        /// r10, x10
         R10,
-        /// r11, w11
+        /// r11, x11
         R11,
-        /// r12, w12
+        /// r12, x12
         R12,
         /// r13, sp
         R13,
@@ -71,19 +71,19 @@ pub mod myarchitecture {
         #[cfg(target_arch = "aarch64")]
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             let name = match self {
-                Register::R0 => "w0",
-                Register::R1 => "w1",
-                Register::R2 => "w2",
-                Register::R3 => "w3",
-                Register::R4 => "w4",
-                Register::R5 => "w5",
-                Register::R6 => "w6",
-                Register::R7 => "w7",
-                Register::R8 => "w8",
-                Register::R9 => "w9",
-                Register::R10 => "w10",
-                Register::R11 => "w11",
-                Register::R12 => "w12",
+                Register::R0 => "x0",
+                Register::R1 => "x1",
+                Register::R2 => "x2",
+                Register::R3 => "x3",
+                Register::R4 => "x4",
+                Register::R5 => "x5",
+                Register::R6 => "x6",
+                Register::R7 => "x7",
+                Register::R8 => "x8",
+                Register::R9 => "x9",
+                Register::R10 => "x10",
+                Register::R11 => "x11",
+                Register::R12 => "x12",
                 Register::R13 => "sp",
                 Register::R14 => "lr",
                 Register::R15 => "pc",
@@ -93,11 +93,22 @@ pub mod myarchitecture {
     }
 
     impl fmt::Display for Operand {
+        #[cfg(target_arch = "x86_64")]
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             let name: String = match self {
                 Operand::Register(r) => r.to_string(),
                 Operand::Address(r) => format!("[{}]", r),
                 Operand::Num(n) => n.to_string(),
+            };
+            write!(f, "{}", name)
+        }
+
+        #[cfg(target_arch = "aarch64")]
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            let name: String = match self {
+                Operand::Register(r) => r.to_string(),
+                Operand::Address(r) => format!("[{}]", r),
+                Operand::Num(n) => format!("#{}", n),
             };
             write!(f, "{}", name)
         }
