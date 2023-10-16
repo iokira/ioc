@@ -49,7 +49,6 @@ pub fn run(input: Input) -> Result<(), MyError> {
         Err(err) => {
             return Err(MyError {
                 message: err.to_string(),
-                position: 0,
             })
         }
     };
@@ -60,7 +59,6 @@ pub fn run(input: Input) -> Result<(), MyError> {
         Err(err) => {
             return Err(MyError {
                 message: err.to_string(),
-                position: 0,
             })
         }
     };
@@ -72,7 +70,6 @@ pub fn run(input: Input) -> Result<(), MyError> {
         Err(err) => {
             return Err(MyError {
                 message: err.to_string(),
-                position: 0,
             })
         }
     };
@@ -86,7 +83,6 @@ pub fn run(input: Input) -> Result<(), MyError> {
                 Err(err) => {
                     return Err(MyError {
                         message: err.to_string(),
-                        position: 0,
                     })
                 }
             };
@@ -95,7 +91,6 @@ pub fn run(input: Input) -> Result<(), MyError> {
                 Err(err) => {
                     return Err(MyError {
                         message: err.to_string(),
-                        position: 0,
                     })
                 }
             };
