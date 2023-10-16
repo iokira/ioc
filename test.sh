@@ -13,7 +13,7 @@ assert() {
 
     echo $input > $MAINC
     $IOC $MAINC $MAINS
-    gcc -z noexecstack $MAINS -o $MAIN
+    gcc $MAINS -o $MAIN
     $MAIN
     actual="$?"
 
