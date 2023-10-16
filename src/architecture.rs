@@ -20,9 +20,9 @@ pub mod myarchitecture {
         R6,
         /// rbx, x7
         R7,
-        /// r8, x8
+        /// r8, x8(rbp)
         R8,
-        /// r9, x9
+        /// r9, x9(tsp)
         R9,
         /// r10, x10
         R10,
@@ -134,6 +134,9 @@ pub mod myarchitecture {
         ".globl _main\n_main:\n".to_string()
     }
 
+    /// push rbp
+    /// mov rbp, rsp
+    /// sub rsp, #bytes
     #[cfg(target_arch = "x86_64")]
     pub fn memory_allocate(bytes: usize) -> String {
         format!(
@@ -147,17 +150,40 @@ pub mod myarchitecture {
         )
     }
 
+    /// mov rbp(r8), sp(r13)
+    /// mov rsp(r9), sp(r13)
+    /// push rbp(r8)
+    /// mov rbp(r8), rsp(r9)
+    /// sub rsp(r9), $bytes
     #[cfg(target_arch = "aarch64")]
     pub fn memory_allocate(bytes: usize) -> String {
         format!(
-            "{}{}{}",
-            push(Operand::Register(Register::R15)),
+            "{}{}{}{}{}",
             mov(
-                Operand::Register(Register::R15),
+                Operand::Register(Register::R8),
                 Operand::Register(Register::R13)
             ),
-            sub(Operand::Register(Register::R13), Operand::Num(bytes))
+            mov(
+                Operand::Register(Register::R9),
+                Operand::Register(Register::R13)
+            ),
+            push(Operand::Register(Register::R8)),
+            mov(
+                Operand::Register(Register::R8),
+                Operand::Register(Register::R9)
+            ),
+            sub(Operand::Register(Register::R9), Operand::Num(bytes))
         )
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    fn ldr(rd: Operand, rn: Operand) -> String {
+        format!("\tldr {}, {}\n", rd, rn)
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    fn str(rd: Operand, rn: Operand) -> String {
+        format!("\tstr {}, {}\n", rd, rn)
     }
 
     #[cfg(target_arch = "x86_64")]
@@ -170,6 +196,9 @@ pub mod myarchitecture {
         pop(Operand::Register(Register::R0))
     }
 
+    /// mov rsp, rbp
+    /// pop rbp
+    /// ret
     #[cfg(target_arch = "x86_64")]
     pub fn program_epilogue() -> String {
         format!(
@@ -183,19 +212,25 @@ pub mod myarchitecture {
         )
     }
 
+    /// mov rsp(r9), rbp(r8)
+    /// pop rbp(r8)
+    /// ret
     #[cfg(target_arch = "aarch64")]
     pub fn program_epilogue() -> String {
         format!(
             "{}{}{}",
             mov(
-                Operand::Register(Register::R13),
-                Operand::Register(Register::R15)
+                Operand::Register(Register::R9),
+                Operand::Register(Register::R8)
             ),
-            pop(Operand::Register(Register::R15)),
+            pop(Operand::Register(Register::R8)),
             ret()
         )
     }
 
+    /// mov rax, rbp
+    /// sub rax, offset
+    /// push rax
     #[cfg(target_arch = "x86_64")]
     pub fn gen_val(offset: usize) -> String {
         format!(
@@ -209,19 +244,25 @@ pub mod myarchitecture {
         )
     }
 
+    /// mov r0, rbp(r8)
+    /// sub rax, offset
+    /// push rax
     #[cfg(target_arch = "aarch64")]
     pub fn gen_val(offset: usize) -> String {
         format!(
             "{}{}{}",
             mov(
                 Operand::Register(Register::R0),
-                Operand::Register(Register::R15)
+                Operand::Register(Register::R8)
             ),
             sub(Operand::Register(Register::R0), Operand::Num(offset)),
             push(Operand::Register(Register::R0))
         )
     }
 
+    /// pop r0
+    /// mov r0, [r0]
+    /// push r0
     pub fn pop_val() -> String {
         format!(
             "{}{}{}",
@@ -234,6 +275,10 @@ pub mod myarchitecture {
         )
     }
 
+    /// pop r1
+    /// pop r0
+    /// mov [r0], r1
+    /// push r1
     #[cfg(target_arch = "x86_64")]
     pub fn pop_lvar() -> String {
         format!(
@@ -248,6 +293,10 @@ pub mod myarchitecture {
         )
     }
 
+    /// pop r1
+    /// pop r0
+    /// mov [r0], r1
+    /// push r1
     #[cfg(target_arch = "aarch64")]
     pub fn pop_lvar() -> String {
         format!(
@@ -262,6 +311,8 @@ pub mod myarchitecture {
         )
     }
 
+    /// pop r1
+    /// pop r0
     pub fn pop_arg() -> String {
         format!(
             "{}{}",
@@ -270,24 +321,43 @@ pub mod myarchitecture {
         )
     }
 
+    /// push rd
     #[cfg(target_arch = "x86_64")]
     pub fn push(rd: Operand) -> String {
         format!("\tpush {}\n", rd)
     }
 
+    /// sub r9, #8
+    /// mov r0, rd
+    /// str r0, r9
     #[cfg(target_arch = "aarch64")]
     pub fn push(rd: Operand) -> String {
-        format!("\tpush {}\n", rd)
+        format!(
+            "{}{}{}",
+            sub(Operand::Register(Register::R9), Operand::Num(8)),
+            mov(Operand::Register(Register::R1), rd),
+            str(
+                Operand::Register(Register::R1),
+                Operand::Address(Register::R9)
+            )
+        )
     }
 
+    /// pop rd
     #[cfg(target_arch = "x86_64")]
     fn pop(rd: Operand) -> String {
         format!("\tpop {}\n", rd)
     }
 
+    /// ldr rd, r9
+    /// add r9, #8
     #[cfg(target_arch = "aarch64")]
-    fn pop(rd: Operand) -> String {
-        format!("\tpop {}\n", rd)
+    pub fn pop(rd: Operand) -> String {
+        format!(
+            "{}{}",
+            ldr(rd, Operand::Address(Register::R9)),
+            add(Operand::Register(Register::R9), Operand::Num(8))
+        )
     }
 
     pub fn add_arg() -> String {
