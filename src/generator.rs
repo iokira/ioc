@@ -8,8 +8,7 @@ pub mod mygenerator {
     // 構文木をアセンブリに変換する
     pub fn generate_assembly(assembly: &mut String, tree: Tree) {
         if let Tree::Num(n) = tree {
-            let str = &push(Operand::Num(n));
-            assembly.push_str(&str);
+            assembly.push_str(&push(Operand::Num(n)));
             return;
         }
 
