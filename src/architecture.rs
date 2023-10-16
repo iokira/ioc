@@ -267,7 +267,7 @@ pub mod myarchitecture {
         format!(
             "{}{}{}",
             pop(Operand::Register(Register::R0)),
-            mov(
+            ldr(
                 Operand::Register(Register::R0),
                 Operand::Address(Register::R0)
             ),
@@ -303,9 +303,9 @@ pub mod myarchitecture {
             "{}{}{}{}",
             pop(Operand::Register(Register::R1)),
             pop(Operand::Register(Register::R0)),
-            mov(
-                Operand::Address(Register::R0),
-                Operand::Register(Register::R1)
+            str(
+                Operand::Register(Register::R1),
+                Operand::Address(Register::R0)
             ),
             push(Operand::Register(Register::R1))
         )
