@@ -1,4 +1,6 @@
 pub mod myparser {
+    use std::process::exit;
+
     use crate::lexer::mylexer::Lexer;
     use crate::token::mytoken::*;
     use crate::tree::mytree::*;
@@ -16,7 +18,8 @@ pub mod myparser {
     fn stmt(lexer: &mut Lexer) -> Tree {
         let tree = expr(lexer);
         if lexer.consume(Token::Operator(OperatorKind::Semi)).is_err() {
-            panic!("expected semi");
+            eprintln!("expected semi");
+            exit(1);
         }
         tree
     }
@@ -137,12 +140,18 @@ pub mod myparser {
                 let tree = expr(lexer);
                 match lexer.consume(Token::Operator(OperatorKind::RParen)) {
                     Ok(_) => tree,
-                    _ => panic!("expect ')' but disappear"),
+                    _ => {
+                        eprintln!("expect ')' but disappear");
+                        exit(1);
+                    }
                 }
             }
             Ok(Token::Operator(OperatorKind::Operand(n))) => Tree::new_num(n),
             Ok(Token::Operator(OperatorKind::Ident(i))) => Tree::new_val(i, lexer),
-            _ => panic!("expect number or block but disappear"),
+            _ => {
+                eprintln!("expect number or block but disappear");
+                exit(1);
+            }
         }
     }
 }

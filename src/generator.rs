@@ -1,4 +1,6 @@
 pub mod mygenerator {
+    use std::process::exit;
+
     use crate::{architecture::myarchitecture::*, tree::mytree::*};
 
     fn generate_val(assembly: &mut String, offset: usize) {
@@ -23,7 +25,8 @@ pub mod mygenerator {
                 if let Tree::Val(o) = *lhs {
                     generate_val(assembly, o);
                 } else {
-                    panic!("The left-hand side value of the assignment is not a variable")
+                    eprintln!("The left-hand side value of the assignment is not a variable");
+                    exit(1);
                 }
                 generate_assembly(assembly, *rhs);
                 assembly.push_str(&pop_lvar());
@@ -44,7 +47,10 @@ pub mod mygenerator {
                 NodeKind::Sub => assembly.push_str(&sub_arg()),
                 NodeKind::Mul => assembly.push_str(&mul_arg()),
                 NodeKind::Div => assembly.push_str(&div_arg()),
-                _ => panic!("unexpected node"),
+                _ => {
+                    eprintln!("unexpected node");
+                    exit(1);
+                }
             }
             assembly.push_str(&push(Operand::Register(Register::R0)));
         }
