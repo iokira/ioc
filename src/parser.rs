@@ -65,26 +65,23 @@ pub mod myparser {
             || lexer.expect(Token::Operator(OperatorKind::Greater))
             || lexer.expect(Token::Operator(OperatorKind::GreaterOrEqual))
         {
-            if lexer.consume(Token::Operator(OperatorKind::Less)).is_ok() {
-                tree = Tree::new_tree(NodeKind::Less, tree, add(lexer));
-            }
             if lexer
                 .consume(Token::Operator(OperatorKind::LessOrEqual))
                 .is_ok()
             {
                 tree = Tree::new_tree(NodeKind::LessOrEqual, tree, add(lexer));
-            }
-            if lexer
-                .consume(Token::Operator(OperatorKind::Greater))
-                .is_ok()
-            {
-                tree = Tree::new_tree(NodeKind::Less, add(lexer), tree);
-            }
-            if lexer
+            } else if lexer.consume(Token::Operator(OperatorKind::Less)).is_ok() {
+                tree = Tree::new_tree(NodeKind::Less, tree, add(lexer));
+            } else if lexer
                 .consume(Token::Operator(OperatorKind::GreaterOrEqual))
                 .is_ok()
             {
                 tree = Tree::new_tree(NodeKind::LessOrEqual, add(lexer), tree);
+            } else if lexer
+                .consume(Token::Operator(OperatorKind::Greater))
+                .is_ok()
+            {
+                tree = Tree::new_tree(NodeKind::Less, add(lexer), tree);
             }
         }
         tree
