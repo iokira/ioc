@@ -1,11 +1,11 @@
 #!/bin/bash
 
 IOC=./target/debug/ioc
-MAINC=./target/source/main.c
-MAINS=./target/source/main.s
-MAIN=./target/source/main
+MAINC=./source/main.c
+MAINS=./source/main.s
+MAIN=./source/main
 
-mkdir -p ./target/source
+mkdir -p ./source
 
 assert() {
     expected="$1"
