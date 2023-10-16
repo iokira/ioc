@@ -452,10 +452,7 @@ pub mod myarchitecture {
 
     #[cfg(target_arch = "aarch64")]
     fn eq(rd: Operand, rn: Operand) -> String {
-        format!(
-            "\tcmp {}, {}\n\tmov {}, #0\n\tmoveq {}, #1\n",
-            rd, rn, rd, rd
-        )
+        format!("\tcmp {}, {}\n\tcset {}, EQ\n", rd, rn, rd)
     }
 
     pub fn neq_arg() -> String {
@@ -472,10 +469,7 @@ pub mod myarchitecture {
 
     #[cfg(target_arch = "aarch64")]
     fn neq(rd: Operand, rn: Operand) -> String {
-        format!(
-            "\tcmp {}, {}\n\tmov {}, #1\n\tmoveq {}, #0\n",
-            rd, rn, rd, rd
-        )
+        format!("\tcmp {}, {}\n\tcset {}, NE\n", rd, rn, rd)
     }
 
     pub fn less_arg() -> String {
@@ -492,10 +486,7 @@ pub mod myarchitecture {
 
     #[cfg(target_arch = "aarch64")]
     fn less(rd: Operand, rn: Operand) -> String {
-        format!(
-            "\tcmp {}, {}\n\tmov {}, #0\n\tmovlt {}, #1\n",
-            rd, rn, rd, rd
-        )
+        format!("\tcmp {}, {}\n\tcset {}, LT\n", rd, rn, rd)
     }
 
     pub fn less_or_eq_arg() -> String {
@@ -512,10 +503,7 @@ pub mod myarchitecture {
 
     #[cfg(target_arch = "aarch64")]
     fn less_or_eq(rd: Operand, rn: Operand) -> String {
-        format!(
-            "\tcmp {}, {}\n\tmov {}, #0\n\tmovle {}, #1\n",
-            rd, rn, rd, rd
-        )
+        format!("\tcmp {}, {}\n\tcset {}, LS\n", rd, rn, rd)
     }
 
     fn ret() -> String {
