@@ -263,6 +263,23 @@ pub mod myarchitecture {
     /// pop r0
     /// mov r0, [r0]
     /// push r0
+    #[cfg(target_arch = "x86_64")]
+    pub fn pop_val() -> String {
+        format!(
+            "{}{}{}",
+            pop(Operand::Register(Register::R0)),
+            mov(
+                Operand::Register(Register::R0),
+                Operand::Address(Register::R0)
+            ),
+            push(Operand::Register(Register::R0))
+        )
+    }
+
+    /// pop r0
+    /// mov r0, [r0]
+    /// push r0
+    #[cfg(target_arch = "aarch64")]
     pub fn pop_val() -> String {
         format!(
             "{}{}{}",
